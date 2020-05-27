@@ -1,3 +1,5 @@
+; Edit test - adding comment at the top
+
 extensions [
   vid
   csv
@@ -815,8 +817,8 @@ end
 GRAPHICS-WINDOW
 75
 197
-333
-456
+483
+606
 -1
 -1
 400.0

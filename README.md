@@ -1,4 +1,4 @@
-# PIPmemb-KP
+# PIPpolarize
 
 Simulation of PIP membrane Kinase Phosphatase reaction
 

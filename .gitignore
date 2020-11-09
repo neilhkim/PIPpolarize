@@ -1,0 +1,6 @@
+# Result folder
+results/
+*.csv
+
+# Temporary nlogo file
+*.tmp.nlogo

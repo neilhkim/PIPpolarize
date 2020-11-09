@@ -806,7 +806,7 @@ SWITCH
 716
 save_timelapse_img?
 save_timelapse_img?
-1
+0
 1
 -1000
 
@@ -838,7 +838,7 @@ INPUTBOX
 803
 72
 endtime
-3.0
+2.0
 1
 0
 Number
@@ -893,9 +893,9 @@ SLIDER
 756
 vid_rec_intval
 vid_rec_intval
-1
+10
 300
-221.0
+50.0
 10
 1
 NIL
@@ -910,7 +910,7 @@ tlapse_interval
 tlapse_interval
 0.5
 150
-2.5
+0.5
 0.5
 1
 s
@@ -1194,7 +1194,7 @@ CHOOSER
 N-runs
 N-runs
 1 2 3 4 5 9 10 20 30 40 50
-5
+0
 
 MONITOR
 564

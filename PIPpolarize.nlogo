@@ -1,5 +1,5 @@
 extensions [ vid ]
-
+; Test adding a comment line.
 globals [
   run-index
 

@@ -250,7 +250,7 @@ to go
   if reset-success? = false
   [ user-message "Reset status unsuccessful."    stop  ]
   if not file-exists? (word save-dir-name "iface-t0 " file-prefix ".png")
-  [ user-message "save-dir-name changed since resetting" set save-dir-name "N/A" stop ]
+  [ user-message "save-dir-name changed since resetting" set save-dir-name "N/A" set reset-success? false stop ]
 
   ; Check stop-conditions and apply necessary ending steps
   if time > endtime

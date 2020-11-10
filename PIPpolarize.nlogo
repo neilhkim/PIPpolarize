@@ -640,10 +640,10 @@ NIL
 1
 
 PLOT
-1010
-341
-1210
-554
+995
+338
+1195
+551
 PIP fraction
 time
 NIL
@@ -659,10 +659,10 @@ PENS
 "pip2" 1.0 2 -4079321 true "" "plotxy time avg_x"
 
 PLOT
-1013
-72
-1212
-286
+998
+69
+1197
+283
 Number of Enzymes
 time
 NIL
@@ -796,10 +796,10 @@ NIL
 HORIZONTAL
 
 PLOT
-1012
-562
-1211
-776
+997
+559
+1196
+773
 Max Pon-patch
 time
 NIL
@@ -847,10 +847,10 @@ record_vid?
 -1000
 
 SWITCH
-1014
-33
-1430
-66
+999
+30
+1415
+63
 save_all_plots?
 save_all_plots?
 1
@@ -942,10 +942,10 @@ s
 HORIZONTAL
 
 SWITCH
-1230
-262
-1428
-295
+1215
+259
+1413
+292
 disallow-too-large-dx?
 disallow-too-large-dx?
 0
@@ -953,10 +953,10 @@ disallow-too-large-dx?
 -1000
 
 PLOT
-1228
-303
-1428
-514
+1213
+300
+1413
+511
 Max Min dx_patch
 time
 NIL
@@ -1038,10 +1038,10 @@ D_enz
 Number
 
 INPUTBOX
-1610
-334
-1710
-394
+1611
+362
+1711
+422
 pert-wavelength
 1.0
 1
@@ -1049,10 +1049,10 @@ pert-wavelength
 Number
 
 BUTTON
-1507
-294
-1709
-327
+1508
+322
+1710
+355
 add-sinusoidal-pip-perturbation
 add-sinusoidal-pip-perturbation
 NIL
@@ -1066,10 +1066,10 @@ NIL
 1
 
 INPUTBOX
-1506
-333
-1603
-393
+1507
+361
+1604
+421
 perturb-amplitude
 1.0
 1
@@ -1128,7 +1128,7 @@ BUTTON
 774
 106
 928
-144
+139
 default value
 set KIN-PPT-X \"[.0 .0 .5]\"
 NIL
@@ -1142,10 +1142,10 @@ NIL
 1
 
 SWITCH
-1507
-449
-1708
-482
+1508
+477
+1709
+510
 smaller-part-test?
 smaller-part-test?
 1
@@ -1153,10 +1153,10 @@ smaller-part-test?
 -1000
 
 MONITOR
-1564
-397
-1708
-442
+1565
+425
+1709
+470
 pert-angular wavenumber
 2 * pi / pert-wavelength
 5
@@ -1175,10 +1175,10 @@ time
 11
 
 PLOT
-1228
-72
-1427
-248
+1213
+69
+1412
+245
 dxdt vs x
 NIL
 NIL
@@ -1216,10 +1216,10 @@ run-index + 1
 11
 
 PLOT
-1227
-563
-1427
-776
+1212
+560
+1412
+773
 xL-xS
 time
 NIL
@@ -1260,10 +1260,10 @@ NIL
 1
 
 SWITCH
-1227
-526
-1428
-559
+1212
+523
+1413
+556
 xL-xS?
 xL-xS?
 0
@@ -1282,10 +1282,10 @@ simple-savename?
 -1000
 
 MONITOR
-1019
-291
-1111
-336
+1004
+288
+1096
+333
 avg  k-density
 count kinases / (patchLength ^ 2 * count inpatches)
 5
@@ -1293,10 +1293,10 @@ count kinases / (patchLength ^ 2 * count inpatches)
 11
 
 MONITOR
-1116
-291
-1209
-336
+1101
+288
+1194
+333
 avg  p-density
 count pptases / (patchLength ^ 2 * count inpatches)
 5
@@ -1304,10 +1304,10 @@ count pptases / (patchLength ^ 2 * count inpatches)
 11
 
 TEXTBOX
-1511
-266
-1717
-301
+1512
+294
+1718
+329
 For deterministic simulation only
 13
 0.0
@@ -1344,9 +1344,9 @@ Phosphatase parameters
 1
 
 TEXTBOX
-1017
+1002
 10
-1167
+1152
 28
 Plots
 13

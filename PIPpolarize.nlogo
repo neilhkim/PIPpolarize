@@ -1,6 +1,7 @@
 extensions [ vid ]
-; Test adding a comment line.
+
 globals [
+  reset-success?
   run-index
 
   ; Internally set Constants ;
@@ -58,6 +59,9 @@ patches-own [
 
 to reset
   clear-all
+  display
+  set reset-success? true ; It will change to false if something goes wrong in the resetting process.
+
   RESET-TICKS
 
   plot_dxdt_vs_x
@@ -78,7 +82,7 @@ to reset
 
   ; Setup space
   resize-world 0 (nGrid - 1) 0 (nGrid - 1)
-  if smaller-part-test? [resize-world 0 (nGrid - 1) 0 (nGrid - 1) / 10]
+  if smaller-part-test? and Calculation-Type = "deterministic" and geometry-setup = "None" [resize-world 0 (nGrid - 1) 0 (nGrid - 1) / 10]
   set-patch-size world_pixel_length / nGrid
   let wrap? true
   ifelse wrap? [ __change-topology true  true  ]
@@ -111,12 +115,13 @@ to reset
   set const-p_Poff p_koff * timestep   if const-p_Poff > 1 [user-message "p_off_prob_sto > 1"]
 
   ; Check for stability condition for the numerical treatment of diffusion
-  if timestep > (worldLength / nGrid) ^ 2 / (4 * D_pip) [ user-message (word "Stable condition not met. Decrease timestep below " ((worldLength / nGrid) ^ 2 / (4 * D_pip)) ) ]
+  if timestep > (worldLength / nGrid) ^ 2 / (4 * D_pip) [ user-message (word "FTCS dispersion - Stable condition not met. Decrease timestep below " ((worldLength / nGrid) ^ 2 / (4 * D_pip)) ) ]
   if Calculation-Type = "deterministic" [if timestep > (worldLength / nGrid) ^ 2 / (4 * D_enz) [ user-message (word "Stable condition not met. Decrease timestep below " ((worldLength / nGrid) ^ 2 / (4 * D_enz)) ) ]]
 
   ; Init save files
   set file-prefix retrieve-simul_info_string
-  if save_timelapse_img? or record_vid? or save_plots?  [initialize-saving]
+  ifelse save_timelapse_img? or record_vid? or save_all_plots?  [  set reset-success? initialize-saving   ]
+  [ set save-dir-name "N/A" ]
   display
 end
 
@@ -215,16 +220,45 @@ to initialize_patches
   ]
 end
 
+to-report initialize-saving
+  let success? true ; This will change to false if something goes wrong in the process.
+  if (save_timelapse_img? or record_vid? or save_all_plots?) and (save-dir-name = "N/A" or save-dir-name = "") [
+    carefully [      set save-dir-name user-directory    ]
+    [ ;user-message "Results saving directory not selected."
+      set success? false ; This will fall-into the "Saving to the save-dir-name failed." case in the down below.
+      set save-dir-name "N/A"
+    ]
+  ]
+  if record_vid? [ carefully [vid:start-recorder]
+    [ user-message "Video init failed. Select a directory to dump the video (if possible)."
+      set-current-directory user-directory
+      carefully [vid:save-recording (word "dump_mov.mp4")]
+      [ user-message "If there was any content, the video is dumped as dump_mov.mp4."]
+      set success? false
+    ]
+  ]
+  carefully [ export-interface (word save-dir-name "iface-t0 " file-prefix ".png") ] ; If this directory does not exist, this will spit out an error message.
+    [ user-message "Saving to the save-dir-name failed. Make sure you've put in a valid directory"
+      set success? false
+      set save-dir-name "N/A"
+  ]
+  report success?
+end
+
 
 to go
+  if reset-success? = false
+  [ user-message "Reset status unsuccessful."    stop  ]
+  if save-dir-name != "N/A" and not file-exists? (word save-dir-name "iface-t0 " file-prefix ".png")
+  [ user-message "save-dir-name changed since resetting" set save-dir-name "N/A" set reset-success? false stop ]
 
   ; Check stop-conditions and apply necessary ending steps
   if time > endtime
   [
     ; Save
     if record_vid? [  vid:save-recording (word file-prefix "_mov.mp4") ]
-    if save_timelapse_img? or record_vid? or save_plots?  [export-interface (word "iface-End " file-prefix ".png")]
-    if save_plots? [export-all-plots (word file-prefix "allplots.csv")]
+    if save_timelapse_img? or record_vid? or save_all_plots?  [export-interface (word "iface-End " file-prefix ".png")]
+    if save_all_plots? [export-all-plots (word file-prefix "allplots.csv")]
 
     set run-index  run-index + 1
 
@@ -281,6 +315,7 @@ to save_tlapse_img
   let $3digit_time ""
   repeat nZeros [set $3digit_time insert-item 0 $3digit_time "0"]
   set $3digit_time (word $3digit_time inttime)
+  set-current-directory save-dir-name
   ifelse simple-savename? [    export-view (word run-index " t" $3digit_time ".png")      ]
                           [    export-view (word file-prefix " t" $3digit_time ".png")    ]
   set next_tlapse_time    next_tlapse_time + tlapse_interval
@@ -481,16 +516,6 @@ to unbind
 end
 
 
-to initialize-saving
-  if save_timelapse_img? or record_vid? or save_plots?  [
-    carefully [      set-current-directory user-directory    ]
-    [ print "Results saving directory not selected." ]
-  ]
-  export-interface (word "iface-t0 " file-prefix ".png")
-  if record_vid? [ carefully [vid:start-recorder][ print "Video init failed." ] ]
-end
-
-
 to set-neighbors_and_outColors
   ask inpatches
   [ set real_neighbors neighbors4 with [member? self inpatches]
@@ -554,10 +579,10 @@ to click-x-up
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-10
-300
-418
-709
+16
+332
+424
+741
 -1
 -1
 8.0
@@ -583,7 +608,7 @@ ticks
 BUTTON
 11
 10
-73
+92
 50
 NIL
 reset
@@ -599,9 +624,9 @@ NIL
 
 BUTTON
 10
-54
-73
-94
+106
+92
+146
 go
 if run-index < N-runs [go]
 T
@@ -615,10 +640,10 @@ NIL
 1
 
 PLOT
-909
-361
-1109
-574
+995
+338
+1195
+551
 PIP fraction
 time
 NIL
@@ -634,10 +659,10 @@ PENS
 "pip2" 1.0 2 -4079321 true "" "plotxy time avg_x"
 
 PLOT
-912
-92
-1111
-306
+998
+69
+1197
+283
 Number of Enzymes
 time
 NIL
@@ -654,9 +679,9 @@ PENS
 
 INPUTBOX
 465
-392
+370
 553
-452
+430
 k_mkon
 0.1
 1
@@ -665,9 +690,9 @@ Number
 
 INPUTBOX
 561
-392
+370
 650
-452
+430
 k_koff
 0.7
 1
@@ -676,9 +701,9 @@ Number
 
 INPUTBOX
 658
-392
+370
 748
-452
+430
 k_mkcat
 10.0
 1
@@ -687,9 +712,9 @@ Number
 
 INPUTBOX
 466
-510
+484
 554
-570
+544
 p_mkon
 0.02
 1
@@ -698,9 +723,9 @@ Number
 
 INPUTBOX
 560
-509
+483
 649
-569
+543
 p_koff
 0.1
 1
@@ -709,9 +734,9 @@ Number
 
 INPUTBOX
 658
-473
+447
 750
-533
+507
 memP_mkcat
 15.0
 1
@@ -719,10 +744,10 @@ memP_mkcat
 Number
 
 SWITCH
-11
-246
-148
-279
+17
+289
+154
+322
 show_enz?
 show_enz?
 0
@@ -731,9 +756,9 @@ show_enz?
 
 INPUTBOX
 562
-298
+276
 649
-358
+336
 D_pip
 2.0
 1
@@ -741,10 +766,10 @@ D_pip
 Number
 
 SLIDER
-159
-246
-401
-279
+165
+289
+408
+322
 enz_size
 enz_size
 0
@@ -756,10 +781,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-220
-203
-403
-236
+226
+246
+409
+279
 world_pixel_length
 world_pixel_length
 100
@@ -771,10 +796,10 @@ NIL
 HORIZONTAL
 
 PLOT
-911
-582
-1110
-796
+997
+559
+1196
+773
 Max Pon-patch
 time
 NIL
@@ -790,20 +815,20 @@ PENS
 "PPT" 1.0 0 -13403783 true "" "plotxy time max [p_Pon] of patches"
 
 CHOOSER
-472
-668
-564
-713
+682
+287
+774
+332
 nGrid
 nGrid
 1 2 3 4 5 6 7 9 10 12 15 16 18 20 24 25 27 30 34 36 40 41 50 51 59 60 64 66 70 89 90 96 100 150 200 250 350 500
 22
 
 SWITCH
-471
-770
-643
-803
+466
+619
+638
+652
 save_timelapse_img?
 save_timelapse_img?
 0
@@ -811,10 +836,10 @@ save_timelapse_img?
 -1000
 
 SWITCH
-657
-771
-821
-804
+652
+620
+816
+653
 record_vid?
 record_vid?
 1
@@ -822,21 +847,21 @@ record_vid?
 -1000
 
 SWITCH
-913
-53
-1329
-86
-save_plots?
-save_plots?
+999
+30
+1415
+63
+save_all_plots?
+save_all_plots?
 1
 1
 -1000
 
 INPUTBOX
-1329
-883
-1393
-943
+470
+180
+561
+240
 endtime
 2.0
 1
@@ -844,10 +869,10 @@ endtime
 Number
 
 INPUTBOX
-280
-13
-709
-90
+303
+10
+732
+80
 input-geometry-fname
 C:\\Users\\Neil\\Dropbox\\Research\\20200824\\confinements\\500-snail6.png
 1
@@ -855,10 +880,10 @@ C:\\Users\\Neil\\Dropbox\\Research\\20200824\\confinements\\500-snail6.png
 String
 
 INPUTBOX
-569
-653
-661
-713
+779
+272
+857
+332
 worldLength
 30.0
 1
@@ -866,10 +891,10 @@ worldLength
 Number
 
 INPUTBOX
-1396
-883
-1456
-943
+565
+180
+649
+240
 timestep
 0.01
 1
@@ -877,9 +902,9 @@ timestep
 Number
 
 CHOOSER
-100
+122
 13
-271
+293
 58
 geometry-setup
 geometry-setup
@@ -887,10 +912,10 @@ geometry-setup
 1
 
 SLIDER
-655
-810
-820
-843
+650
+659
+815
+692
 vid_rec_intval
 vid_rec_intval
 10
@@ -902,25 +927,25 @@ NIL
 HORIZONTAL
 
 SLIDER
-471
-809
-643
-842
+466
+658
+638
+691
 tlapse_interval
 tlapse_interval
 0.5
 150
-0.5
+1.0
 0.5
 1
 s
 HORIZONTAL
 
 SWITCH
-1129
-282
-1327
-315
+1215
+259
+1413
+292
 disallow-too-large-dx?
 disallow-too-large-dx?
 0
@@ -928,10 +953,10 @@ disallow-too-large-dx?
 -1000
 
 PLOT
-1127
-323
-1327
-534
+1213
+300
+1413
+511
 Max Min dx_patch
 time
 NIL
@@ -947,10 +972,10 @@ PENS
 "min" 1.0 0 -7500403 true "" "if inpatches != 0 [plotxy time min [dx_patch] of inpatches ]"
 
 MONITOR
-665
-669
-758
-714
+861
+287
+937
+332
 patchLength
 worldLength / nGrid
 7
@@ -958,10 +983,10 @@ worldLength / nGrid
 11
 
 SWITCH
-11
-202
-151
-235
+17
+245
+157
+278
 time-on-image?
 time-on-image?
 0
@@ -970,9 +995,9 @@ time-on-image?
 
 INPUTBOX
 755
-392
+370
 845
-452
+430
 k_mKm
 2.0
 1
@@ -981,9 +1006,9 @@ Number
 
 INPUTBOX
 756
-509
+483
 843
-569
+543
 p_mKm
 0.5
 1
@@ -992,9 +1017,9 @@ Number
 
 INPUTBOX
 658
-538
+512
 751
-598
+572
 solP_mkcat
 15.0
 1
@@ -1003,37 +1028,20 @@ Number
 
 INPUTBOX
 466
-298
+276
 555
-358
+336
 D_enz
 0.2
 1
 0
 Number
 
-BUTTON
-655
-851
-820
-884
-force-save-video
-vid:save-recording (word file-prefix \"_forcesaved.mp4\")
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
 INPUTBOX
-126
-781
-226
-841
+1611
+362
+1711
+422
 pert-wavelength
 1.0
 1
@@ -1041,10 +1049,10 @@ pert-wavelength
 Number
 
 BUTTON
-23
-741
-225
-774
+1508
+322
+1710
+355
 add-sinusoidal-pip-perturbation
 add-sinusoidal-pip-perturbation
 NIL
@@ -1058,10 +1066,10 @@ NIL
 1
 
 INPUTBOX
-22
-780
-119
-840
+1507
+361
+1604
+421
 perturb-amplitude
 1.0
 1
@@ -1069,9 +1077,9 @@ perturb-amplitude
 Number
 
 BUTTON
-101
+123
 65
-270
+292
 98
 change input geometry file
 carefully [ set input-geometry-fname user-file ]\n  [ print \"geometry-input-fname not updated.\" ]
@@ -1086,30 +1094,30 @@ NIL
 1
 
 CHOOSER
-1190
-887
-1315
-932
+13
+175
+205
+220
 Calculation-Type
 Calculation-Type
 "stochastic" "deterministic"
 0
 
 CHOOSER
-1190
-938
-1315
-983
+215
+174
+407
+219
 Enzyme-Pair-Type
 Enzyme-Pair-Type
 "memK-memP" "memK-solP"
 0
 
 INPUTBOX
-239
-741
-394
-801
+774
+41
+929
+101
 KIN-PPT-X
 [.0 .0 .5]
 1
@@ -1117,10 +1125,10 @@ KIN-PPT-X
 String
 
 BUTTON
-239
-806
-393
-844
+774
+106
+928
+139
 default value
 set KIN-PPT-X \"[.0 .0 .5]\"
 NIL
@@ -1134,10 +1142,10 @@ NIL
 1
 
 SWITCH
-239
-857
-395
-890
+1508
+477
+1709
+510
 smaller-part-test?
 smaller-part-test?
 1
@@ -1145,10 +1153,10 @@ smaller-part-test?
 -1000
 
 MONITOR
-72
-844
-224
-889
+1565
+425
+1709
+470
 pert-angular wavenumber
 2 * pi / pert-wavelength
 5
@@ -1156,10 +1164,10 @@ pert-angular wavenumber
 11
 
 MONITOR
-157
-196
-214
-241
+163
+239
+220
+284
 NIL
 time
 3
@@ -1167,10 +1175,10 @@ time
 11
 
 PLOT
-1127
-92
-1326
-268
+1213
+69
+1412
+245
 dxdt vs x
 NIL
 NIL
@@ -1187,31 +1195,31 @@ PENS
 "x0.5" 1.0 0 -16777216 true "" ""
 
 CHOOSER
-466
-214
-559
-259
+685
+187
+778
+232
 N-runs
 N-runs
 1 2 3 4 5 9 10 20 30 40 50
 0
 
 MONITOR
-566
-215
-633
-260
-NIL
-run-index
+785
+188
+863
+233
+Current run
+run-index + 1
 17
 1
 11
 
 PLOT
-1126
-583
-1326
-796
+1212
+560
+1412
+773
 xL-xS
 time
 NIL
@@ -1235,12 +1243,12 @@ PENS
 "9" 1.0 2 -16777216 true "" ""
 
 BUTTON
-101
+123
 113
-271
+293
 146
 set-save-dir
-carefully [set save-dir-name user-directory]\n[ \nuser-message (word \"Save directory not changed.\")\n]
+carefully [\nset save-dir-name user-directory\nset reset-success? false\n]\n[ \nuser-message (word \"Save directory unchanged.\")\n]
 NIL
 1
 T
@@ -1252,32 +1260,21 @@ NIL
 1
 
 SWITCH
-1126
-546
-1327
-579
+1212
+523
+1413
+556
 xL-xS?
 xL-xS?
 0
 1
 -1000
 
-MONITOR
-1330
-945
-1457
-990
-stable timestep max
-(worldLength / nGrid) ^ 2 / (4 * D_pip)
-5
-1
-11
-
 SWITCH
-471
-850
-643
-883
+466
+699
+638
+732
 simple-savename?
 simple-savename?
 1
@@ -1285,10 +1282,10 @@ simple-savename?
 -1000
 
 MONITOR
-918
-311
-1010
-356
+1004
+288
+1096
+333
 avg  k-density
 count kinases / (patchLength ^ 2 * count inpatches)
 5
@@ -1296,10 +1293,10 @@ count kinases / (patchLength ^ 2 * count inpatches)
 11
 
 MONITOR
-1015
-311
-1108
-356
+1101
+288
+1194
+333
 avg  p-density
 count pptases / (patchLength ^ 2 * count inpatches)
 5
@@ -1307,20 +1304,20 @@ count pptases / (patchLength ^ 2 * count inpatches)
 11
 
 TEXTBOX
-23
-719
-202
-743
-For deterministic simulation:
+1512
+294
+1718
+329
+For deterministic simulation only
 13
 0.0
 1
 
 TEXTBOX
 472
-275
+253
 622
-293
+271
 Diffusion constants
 13
 0.0
@@ -1328,9 +1325,9 @@ Diffusion constants
 
 TEXTBOX
 469
-369
+347
 619
-387
+365
 Kinase parameters
 13
 0.0
@@ -1338,54 +1335,115 @@ Kinase parameters
 
 TEXTBOX
 468
-474
+448
 618
-492
+466
 Phosphatase parameters
 13
 0.0
 1
 
 TEXTBOX
-916
-30
-1066
-48
+1002
+10
+1152
+28
 Plots
 13
 0.0
 1
 
 TEXTBOX
-477
-742
-670
-761
+473
+593
+666
+612
 Saving Images and Videos
 13
 0.0
 1
 
 TEXTBOX
-478
-626
-682
-658
+688
+247
+892
+279
 Membrane size and patches
 13
 0.0
 1
 
 INPUTBOX
-279
-98
-708
-158
+304
+82
+733
+146
 save-dir-name
-NIL
+C:\\Users\\Neil\\Dropbox\\github\\PIPpolarize\\results\\test\\
 1
 0
 String
+
+MONITOR
+10
+56
+93
+101
+NIL
+reset-success?
+17
+1
+11
+
+TEXTBOX
+474
+159
+624
+177
+Time setting
+13
+0.0
+1
+
+TEXTBOX
+15
+152
+165
+170
+Simulation type
+13
+0.0
+1
+
+TEXTBOX
+688
+164
+838
+182
+Simulation Runs
+13
+0.0
+1
+
+TEXTBOX
+17
+225
+167
+243
+Visual
+13
+0.0
+1
+
+TEXTBOX
+777
+15
+927
+33
+Starting condition
+13
+0.0
+1
 
 @#$#@#$#@
 ## WHAT IS IT?

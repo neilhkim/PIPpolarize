@@ -249,7 +249,7 @@ end
 to go
   if reset-success? = false
   [ user-message "Reset status unsuccessful."    stop  ]
-  if not file-exists? (word save-dir-name "iface-t0 " file-prefix ".png")
+  if save-dir-name != "N/A" and not file-exists? (word save-dir-name "iface-t0 " file-prefix ".png")
   [ user-message "save-dir-name changed since resetting" set save-dir-name "N/A" set reset-success? false stop ]
 
   ; Check stop-conditions and apply necessary ending steps
@@ -315,6 +315,7 @@ to save_tlapse_img
   let $3digit_time ""
   repeat nZeros [set $3digit_time insert-item 0 $3digit_time "0"]
   set $3digit_time (word $3digit_time inttime)
+  set-current-directory save-dir-name
   ifelse simple-savename? [    export-view (word run-index " t" $3digit_time ".png")      ]
                           [    export-view (word file-prefix " t" $3digit_time ".png")    ]
   set next_tlapse_time    next_tlapse_time + tlapse_interval
@@ -830,7 +831,7 @@ SWITCH
 652
 save_timelapse_img?
 save_timelapse_img?
-1
+0
 1
 -1000
 
@@ -1378,7 +1379,7 @@ INPUTBOX
 733
 146
 save-dir-name
-N/A
+C:\\Users\\Neil\\Dropbox\\github\\PIPpolarize\\results\\test\\
 1
 0
 String

@@ -1,7 +1,9 @@
 # Result folder
+/*.png
 results/
 result/
 *.csv
+
 
 # Temporary nlogo file
 *.tmp.nlogo

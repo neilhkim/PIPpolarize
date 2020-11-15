@@ -322,8 +322,9 @@ to save_tlapse_img
   repeat nZeros [set $3digit_time insert-item 0 $3digit_time "0"]
   set $3digit_time (word $3digit_time inttime)
   set-current-directory save-dir-name
-  ifelse simple-savename? [    export-view (word run-index " t" $3digit_time ".png")      ]
-                          [    export-view (word file-prefix " t" $3digit_time ".png")    ]
+  export-view (word run-index " t" $3digit_time ".png")
+;  ifelse simple-savename? [    export-view (word run-index " t" $3digit_time ".png")      ]
+;                          [    export-view (word file-prefix " t" $3digit_time ".png")    ]
   set next_tlapse_time    next_tlapse_time + tlapse_interval
 end
 
@@ -837,7 +838,7 @@ SWITCH
 697
 save_timelapse_img?
 save_timelapse_img?
-1
+0
 1
 -1000
 
@@ -848,7 +849,7 @@ SWITCH
 724
 record_vid?
 record_vid?
-1
+0
 1
 -1000
 
@@ -926,7 +927,7 @@ vid_rec_intval
 vid_rec_intval
 10
 300
-50.0
+10.0
 10
 1
 NIL
@@ -941,7 +942,7 @@ tlapse_interval
 tlapse_interval
 0.5
 150
-1.0
+0.5
 0.5
 1
 s
@@ -1117,7 +1118,7 @@ CHOOSER
 Enzyme-Pair-Type
 Enzyme-Pair-Type
 "memK-memP" "memK-solP"
-0
+1
 
 INPUTBOX
 847
@@ -1208,7 +1209,7 @@ CHOOSER
 N-runs
 N-runs
 1 2 3 4 5 9 10 20 30 40 50
-3
+2
 
 MONITOR
 850
@@ -1385,7 +1386,7 @@ INPUTBOX
 806
 168
 save-dir-name
-C:\\Users\\Neil\\Dropbox\\github\\PIPpolarize\\results\\111\\
+C:\\Users\\Neil\\Dropbox\\github\\PIPpolarize\\results\\123\\
 1
 0
 String

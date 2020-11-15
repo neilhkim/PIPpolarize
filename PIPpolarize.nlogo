@@ -120,7 +120,7 @@ to setup
 
   ; Init save files
   set file-prefix retrieve-simul_info_string
-  ifelse save_timelapse_img? or record_vid? or save_all_plots?  [  set setup-success? initialize-saving   ]
+  ifelse save_timelapse_img? or record_vid? or save_all_plots? or save-xL-xS?  [  set setup-success? initialize-saving   ]
   [ set save-dir-name "N/A" ]
   display
 end
@@ -222,7 +222,8 @@ end
 
 to-report initialize-saving
   let success? true ; This will change to false if something goes wrong in the process.
-  if (save_timelapse_img? or record_vid? or save_all_plots?) and (save-dir-name = "N/A" or save-dir-name = "") [
+  if (save_timelapse_img? or record_vid? or save_all_plots? or save-xL-xS?) and (save-dir-name = "N/A" or save-dir-name = "") [
+    print "wft"
     carefully [      set save-dir-name user-directory    ]
     [ ;user-message "Results saving directory not selected."
       set success? false ; This will fall-into the "Saving to the save-dir-name failed." case in the down below.
@@ -275,7 +276,7 @@ to go
 
     ; All-runs end and Export "xL-xS"
     if run-index >= N-runs [
-      if save-xL-xS? [export-plot "xL-xS" (word file-prefix "xL-xS of " N-runs " runs.csv")]
+      if save-xL-xS? [export-plot "xL-xS" (word "xL-xS of " file-prefix  " " N-runs "-runs.csv")]
       if record_vid? [  vid:save-recording (word file-prefix "_mov.mp4") ]
       if save_all_plots? [export-all-plots (word file-prefix " - allplots.csv")]
       set run-index  run-index - 1 ; for visual purpose
@@ -284,7 +285,7 @@ to go
     ; Clear non-accumulative plots
     set-current-plot "Max Min dx_patch" clear-plot
     set-current-plot "Max Pon-patch" clear-plot
-    set-current-plot "Max - Min dx_patch" clear-plot
+;    set-current-plot "Max - Min dx_patch" clear-plot
   ]
 
   ; Visual/graph updates
@@ -543,14 +544,14 @@ end
 
 to-report retrieve-simul_info_string
   if Enzyme-Pair-Type = "memK-memP" [
-    report (word run-index " " (substring Calculation-Type 0 3) " " worldLength "um "
-      "on-off-cat-Km K " k_mkon " " k_koff " " k_mkcat " " k_mKm " "
-      "P " p_mkon " " p_koff " " memP_mkcat " " p_mKm    )  ]
+    report (word (substring Calculation-Type 0 3) " " worldLength "um "
+      "mkon-off-mkcat-mKm of memK - " k_mkon "-" k_koff "-" k_mkcat "-" k_mKm
+      "_ of memP - " p_mkon "-" p_koff "-" memP_mkcat "-" p_mKm    )  ]
 
   if Enzyme-Pair-Type = "memK-solP" [
-    report (word run-index " " (substring Calculation-Type 0 3) " " worldLength "um "
-      "k_on-off-cat-Km " k_mkon " " k_koff " " k_mkcat " " k_mKm " "
-      "p_cat_unitA-Km " solP_mkcat " " p_mKm    )  ]
+    report (word (substring Calculation-Type 0 3) " " worldLength "um "
+       "on-off-cat-Km of memK - " k_mkon "-" k_koff "-" k_mkcat "-" k_mKm
+      "_ of solP - " solP_mkcat "-" p_mKm    )  ]
 end
 
 
@@ -836,7 +837,7 @@ SWITCH
 697
 save_timelapse_img?
 save_timelapse_img?
-0
+1
 1
 -1000
 
@@ -1106,7 +1107,7 @@ CHOOSER
 Calculation-Type
 Calculation-Type
 "stochastic" "deterministic"
-1
+0
 
 CHOOSER
 223
@@ -1207,7 +1208,7 @@ CHOOSER
 N-runs
 N-runs
 1 2 3 4 5 9 10 20 30 40 50
-0
+3
 
 MONITOR
 850
@@ -1384,7 +1385,7 @@ INPUTBOX
 806
 168
 save-dir-name
-C:\\Users\\Neil\\Dropbox\\github\\PIPpolarize\\results\\test\\
+C:\\Users\\Neil\\Dropbox\\github\\PIPpolarize\\results\\111\\
 1
 0
 String

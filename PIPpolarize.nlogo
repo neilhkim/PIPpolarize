@@ -273,7 +273,7 @@ to go
 
     ; All-runs end and Export "xL-xS"
     if run-index >= N-runs [
-      if xL-xS? [export-plot "xL-xS" "xL-xS all runs.csv"]
+      if xL-xS? [export-plot "xL-xS" (word file-prefix "xL-xS of " N-runs " runs.csv")]
       stop
     ]
     ; Clear non-accumulative plots
@@ -1101,7 +1101,7 @@ CHOOSER
 Calculation-Type
 Calculation-Type
 "stochastic" "deterministic"
-0
+1
 
 CHOOSER
 223

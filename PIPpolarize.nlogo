@@ -579,10 +579,10 @@ to click-x-up
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-16
-332
-424
-741
+11
+375
+419
+784
 -1
 -1
 8.0
@@ -606,10 +606,10 @@ ticks
 30.0
 
 BUTTON
-11
-10
-92
-50
+16
+35
+125
+75
 NIL
 reset
 NIL
@@ -623,10 +623,10 @@ NIL
 1
 
 BUTTON
-10
-106
-92
-146
+15
+131
+126
+171
 go
 if run-index < N-runs [go]
 T
@@ -640,10 +640,10 @@ NIL
 1
 
 PLOT
-995
-338
-1195
-551
+1049
+360
+1249
+573
 PIP fraction
 time
 NIL
@@ -659,10 +659,10 @@ PENS
 "pip2" 1.0 2 -4079321 true "" "plotxy time avg_x"
 
 PLOT
-998
-69
-1197
-283
+1052
+91
+1251
+305
 Number of Enzymes
 time
 NIL
@@ -678,10 +678,10 @@ PENS
 "PPT" 1.0 2 -11221820 true "" "if Calculation-Type = \"deterministic\" [plotxy time sum ([patch_p_density] of inpatches) * patchLength ^ 2]\nif Calculation-Type = \"stochastic\" [plotxy time count pptases]\n"
 
 INPUTBOX
-465
-370
-553
-430
+530
+414
+618
+474
 k_mkon
 0.1
 1
@@ -689,10 +689,10 @@ k_mkon
 Number
 
 INPUTBOX
-561
-370
-650
-430
+626
+414
+715
+474
 k_koff
 0.7
 1
@@ -700,10 +700,10 @@ k_koff
 Number
 
 INPUTBOX
-658
-370
-748
-430
+723
+414
+813
+474
 k_mkcat
 10.0
 1
@@ -711,10 +711,10 @@ k_mkcat
 Number
 
 INPUTBOX
-466
-484
-554
-544
+531
+528
+619
+588
 p_mkon
 0.02
 1
@@ -722,10 +722,10 @@ p_mkon
 Number
 
 INPUTBOX
-560
-483
-649
-543
+625
+527
+714
+587
 p_koff
 0.1
 1
@@ -733,10 +733,10 @@ p_koff
 Number
 
 INPUTBOX
-658
-447
-750
-507
+723
+491
+815
+551
 memP_mkcat
 15.0
 1
@@ -744,10 +744,10 @@ memP_mkcat
 Number
 
 SWITCH
-17
-289
-154
-322
+24
+331
+161
+364
 show_enz?
 show_enz?
 0
@@ -755,10 +755,10 @@ show_enz?
 -1000
 
 INPUTBOX
-562
-276
-649
-336
+627
+320
+714
+380
 D_pip
 2.0
 1
@@ -766,10 +766,10 @@ D_pip
 Number
 
 SLIDER
-165
-289
-408
-322
+172
+331
+415
+364
 enz_size
 enz_size
 0
@@ -781,10 +781,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-226
-246
-409
-279
+233
+288
+416
+321
 world_pixel_length
 world_pixel_length
 100
@@ -796,10 +796,10 @@ NIL
 HORIZONTAL
 
 PLOT
-997
-559
-1196
-773
+1051
+581
+1250
+795
 Max Pon-patch
 time
 NIL
@@ -815,20 +815,20 @@ PENS
 "PPT" 1.0 0 -13403783 true "" "plotxy time max [p_Pon] of patches"
 
 CHOOSER
-682
-287
-774
-332
+748
+334
+840
+379
 nGrid
 nGrid
 1 2 3 4 5 6 7 9 10 12 15 16 18 20 24 25 27 30 34 36 40 41 50 51 59 60 64 66 70 89 90 96 100 150 200 250 350 500
 22
 
 SWITCH
-466
-619
-638
-652
+534
+664
+706
+697
 save_timelapse_img?
 save_timelapse_img?
 0
@@ -836,10 +836,10 @@ save_timelapse_img?
 -1000
 
 SWITCH
-652
-620
-816
-653
+733
+691
+853
+724
 record_vid?
 record_vid?
 1
@@ -847,10 +847,10 @@ record_vid?
 -1000
 
 SWITCH
-999
-30
-1415
-63
+1053
+52
+1469
+85
 save_all_plots?
 save_all_plots?
 1
@@ -858,10 +858,10 @@ save_all_plots?
 -1000
 
 INPUTBOX
-470
-180
-561
-240
+535
+224
+626
+284
 endtime
 2.0
 1
@@ -869,10 +869,10 @@ endtime
 Number
 
 INPUTBOX
-303
-10
-732
-80
+376
+32
+805
+102
 input-geometry-fname
 C:\\Users\\Neil\\Dropbox\\Research\\20200824\\confinements\\500-snail6.png
 1
@@ -880,10 +880,10 @@ C:\\Users\\Neil\\Dropbox\\Research\\20200824\\confinements\\500-snail6.png
 String
 
 INPUTBOX
-779
-272
-857
-332
+845
+319
+923
+379
 worldLength
 30.0
 1
@@ -891,10 +891,10 @@ worldLength
 Number
 
 INPUTBOX
-565
-180
-649
-240
+630
+224
+714
+284
 timestep
 0.01
 1
@@ -902,20 +902,20 @@ timestep
 Number
 
 CHOOSER
-122
-13
-293
-58
+195
+35
+366
+80
 geometry-setup
 geometry-setup
 "None" "Confinement"
 1
 
 SLIDER
-650
-659
-815
-692
+731
+730
+853
+763
 vid_rec_intval
 vid_rec_intval
 10
@@ -927,10 +927,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-466
-658
-638
-691
+534
+703
+706
+736
 tlapse_interval
 tlapse_interval
 0.5
@@ -942,10 +942,10 @@ s
 HORIZONTAL
 
 SWITCH
-1215
-259
-1413
-292
+1269
+281
+1467
+314
 disallow-too-large-dx?
 disallow-too-large-dx?
 0
@@ -953,10 +953,10 @@ disallow-too-large-dx?
 -1000
 
 PLOT
-1213
-300
-1413
-511
+1267
+322
+1467
+533
 Max Min dx_patch
 time
 NIL
@@ -972,10 +972,10 @@ PENS
 "min" 1.0 0 -7500403 true "" "if inpatches != 0 [plotxy time min [dx_patch] of inpatches ]"
 
 MONITOR
-861
-287
-937
-332
+927
+334
+1003
+379
 patchLength
 worldLength / nGrid
 7
@@ -983,10 +983,10 @@ worldLength / nGrid
 11
 
 SWITCH
-17
-245
-157
-278
+24
+287
+164
+320
 time-on-image?
 time-on-image?
 0
@@ -994,10 +994,10 @@ time-on-image?
 -1000
 
 INPUTBOX
-755
-370
-845
-430
+820
+414
+910
+474
 k_mKm
 2.0
 1
@@ -1005,10 +1005,10 @@ k_mKm
 Number
 
 INPUTBOX
-756
-483
-843
-543
+821
+527
+908
+587
 p_mKm
 0.5
 1
@@ -1016,10 +1016,10 @@ p_mKm
 Number
 
 INPUTBOX
-658
-512
-751
-572
+723
+556
+816
+616
 solP_mkcat
 15.0
 1
@@ -1027,10 +1027,10 @@ solP_mkcat
 Number
 
 INPUTBOX
-466
-276
-555
-336
+531
+320
+620
+380
 D_enz
 0.2
 1
@@ -1038,10 +1038,10 @@ D_enz
 Number
 
 INPUTBOX
-1611
-362
-1711
-422
+1606
+99
+1706
+159
 pert-wavelength
 1.0
 1
@@ -1049,10 +1049,10 @@ pert-wavelength
 Number
 
 BUTTON
-1508
-322
-1710
-355
+1503
+59
+1705
+92
 add-sinusoidal-pip-perturbation
 add-sinusoidal-pip-perturbation
 NIL
@@ -1066,10 +1066,10 @@ NIL
 1
 
 INPUTBOX
-1507
-361
-1604
-421
+1502
+98
+1599
+158
 perturb-amplitude
 1.0
 1
@@ -1077,10 +1077,10 @@ perturb-amplitude
 Number
 
 BUTTON
-123
-65
-292
-98
+196
+87
+365
+120
 change input geometry file
 carefully [ set input-geometry-fname user-file ]\n  [ print \"geometry-input-fname not updated.\" ]
 NIL
@@ -1094,30 +1094,30 @@ NIL
 1
 
 CHOOSER
-13
-175
-205
-220
+20
+217
+212
+262
 Calculation-Type
 Calculation-Type
 "stochastic" "deterministic"
 0
 
 CHOOSER
-215
-174
-407
-219
+222
+216
+414
+261
 Enzyme-Pair-Type
 Enzyme-Pair-Type
 "memK-memP" "memK-solP"
 0
 
 INPUTBOX
-774
-41
-929
-101
+847
+63
+1002
+123
 KIN-PPT-X
 [.0 .0 .5]
 1
@@ -1125,10 +1125,10 @@ KIN-PPT-X
 String
 
 BUTTON
-774
-106
-928
-139
+847
+128
+1001
+161
 default value
 set KIN-PPT-X \"[.0 .0 .5]\"
 NIL
@@ -1142,10 +1142,10 @@ NIL
 1
 
 SWITCH
-1508
-477
-1709
-510
+1503
+245
+1704
+278
 smaller-part-test?
 smaller-part-test?
 1
@@ -1153,10 +1153,10 @@ smaller-part-test?
 -1000
 
 MONITOR
-1565
-425
-1709
-470
+1502
+162
+1704
+207
 pert-angular wavenumber
 2 * pi / pert-wavelength
 5
@@ -1164,10 +1164,10 @@ pert-angular wavenumber
 11
 
 MONITOR
-163
-239
-220
-284
+170
+281
+227
+326
 NIL
 time
 3
@@ -1175,10 +1175,10 @@ time
 11
 
 PLOT
-1213
-69
-1412
-245
+1267
+91
+1466
+267
 dxdt vs x
 NIL
 NIL
@@ -1195,20 +1195,20 @@ PENS
 "x0.5" 1.0 0 -16777216 true "" ""
 
 CHOOSER
-685
-187
-778
-232
+750
+231
+843
+276
 N-runs
 N-runs
 1 2 3 4 5 9 10 20 30 40 50
 0
 
 MONITOR
-785
-188
-863
-233
+850
+232
+928
+277
 Current run
 run-index + 1
 17
@@ -1216,10 +1216,10 @@ run-index + 1
 11
 
 PLOT
-1212
-560
-1412
-773
+1266
+582
+1466
+795
 xL-xS
 time
 NIL
@@ -1243,10 +1243,10 @@ PENS
 "9" 1.0 2 -16777216 true "" ""
 
 BUTTON
-123
-113
-293
-146
+196
+135
+366
+168
 set-save-dir
 carefully [\nset save-dir-name user-directory\nset reset-success? false\n]\n[ \nuser-message (word \"Save directory unchanged.\")\n]
 NIL
@@ -1260,10 +1260,10 @@ NIL
 1
 
 SWITCH
-1212
-523
-1413
-556
+1266
+545
+1467
+578
 xL-xS?
 xL-xS?
 0
@@ -1271,10 +1271,10 @@ xL-xS?
 -1000
 
 SWITCH
-466
-699
-638
-732
+534
+744
+706
+777
 simple-savename?
 simple-savename?
 1
@@ -1282,10 +1282,10 @@ simple-savename?
 -1000
 
 MONITOR
-1004
-288
-1096
-333
+1058
+310
+1150
+355
 avg  k-density
 count kinases / (patchLength ^ 2 * count inpatches)
 5
@@ -1293,10 +1293,10 @@ count kinases / (patchLength ^ 2 * count inpatches)
 11
 
 MONITOR
-1101
-288
-1194
-333
+1155
+310
+1248
+355
 avg  p-density
 count pptases / (patchLength ^ 2 * count inpatches)
 5
@@ -1304,80 +1304,80 @@ count pptases / (patchLength ^ 2 * count inpatches)
 11
 
 TEXTBOX
-1512
-294
-1718
-329
-For deterministic simulation only
+1508
+34
+1714
+69
+Deterministic Simulation Settings
 13
 0.0
 1
 
 TEXTBOX
-472
-253
-622
-271
+537
+297
+687
+315
 Diffusion constants
 13
 0.0
 1
 
 TEXTBOX
-469
-347
-619
-365
+534
+391
+684
+409
 Kinase parameters
 13
 0.0
 1
 
 TEXTBOX
-468
-448
-618
-466
+533
+492
+683
+510
 Phosphatase parameters
 13
 0.0
 1
 
 TEXTBOX
-1002
-10
-1152
-28
+1056
+32
+1206
+50
 Plots
 13
 0.0
 1
 
 TEXTBOX
-473
-593
-666
-612
+536
+637
+729
+656
 Saving Images and Videos
 13
 0.0
 1
 
 TEXTBOX
-688
-247
-892
-279
+754
+294
+958
+326
 Membrane size and patches
 13
 0.0
 1
 
 INPUTBOX
-304
-82
-733
-146
+377
+104
+806
+168
 save-dir-name
 C:\\Users\\Neil\\Dropbox\\github\\PIPpolarize\\results\\test\\
 1
@@ -1385,10 +1385,10 @@ C:\\Users\\Neil\\Dropbox\\github\\PIPpolarize\\results\\test\\
 String
 
 MONITOR
-10
-56
-93
-101
+15
+81
+125
+126
 NIL
 reset-success?
 17
@@ -1396,51 +1396,81 @@ reset-success?
 11
 
 TEXTBOX
-474
-159
-624
-177
+539
+203
+689
+221
 Time setting
 13
 0.0
 1
 
 TEXTBOX
-15
-152
-165
-170
-Simulation type
+22
+194
+172
+212
+Simulation Type Setting
 13
 0.0
 1
 
 TEXTBOX
-688
-164
-838
-182
+753
+208
+903
+226
 Simulation Runs
 13
 0.0
 1
 
 TEXTBOX
-17
-225
-167
-243
-Visual
+24
+267
+174
+285
+Visual Settings
 13
 0.0
 1
 
 TEXTBOX
-777
-15
-927
-33
+850
+37
+1000
+55
 Starting condition
+13
+0.0
+1
+
+TEXTBOX
+1506
+223
+1656
+241
+Special Settings\t
+13
+0.0
+1
+
+TEXTBOX
+21
+10
+171
+28
+Main Commands\t
+13
+0.0
+1
+
+TEXTBOX
+201
+11
+351
+29
+File I/O
 13
 0.0
 1

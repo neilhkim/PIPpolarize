@@ -57,7 +57,7 @@ patches-own [
   p_Pon
 ]
 
-to reset
+to setup
   clear-all
   display
   set reset-success? true ; It will change to false if something goes wrong in the resetting process.
@@ -258,7 +258,7 @@ to go
     ; Save
     if record_vid? [  vid:save-recording (word file-prefix "_mov.mp4") ]
     if save_timelapse_img? or record_vid? or save_all_plots?  [export-interface (word "iface-End " file-prefix ".png")]
-    if save_all_plots? [export-all-plots (word file-prefix "allplots.csv")]
+    if save_all_plots? [export-all-plots (word file-prefix " - allplots.csv")]
 
     set run-index  run-index + 1
 
@@ -611,7 +611,7 @@ BUTTON
 125
 75
 NIL
-reset
+setup
 NIL
 1
 T

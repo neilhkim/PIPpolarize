@@ -1,7 +1,7 @@
 extensions [ vid ]
 
 globals [
-  reset-success?
+  setup-success?
   run-index
 
   ; Internally set Constants ;
@@ -57,10 +57,10 @@ patches-own [
   p_Pon
 ]
 
-to reset
+to setup
   clear-all
   display
-  set reset-success? true ; It will change to false if something goes wrong in the resetting process.
+  set setup-success? true ; It will change to false if something goes wrong in the resetting process.
 
   RESET-TICKS
 
@@ -93,18 +93,18 @@ to reset
   initialize_patches
 
   ; L patch and S patch
-  if xL-xS? [
+  if plot-xL-xS? [
     set Lpatches no-patches
     set Spatches no-patches
     ask inpatches [
       if pxcor >= 24 / 50 * nGrid and pxcor < 26 / 50 * nGrid and pycor >= 24 / 50 * nGrid and pycor < 26 / 50 * nGrid [ set Lpatches (patch-set Lpatches self)]
       if pxcor >= 45 / 50 * nGrid and pxcor < 47 / 50 * nGrid and pycor >= 44 / 50 * nGrid and pycor < 46 / 50 * nGrid [ set Spatches (patch-set Spatches self)]
     ]
-    if Spatches = no-patches or Lpatches = no-patches [ user-message "Are you using 50-snail6.png as geometry? If not, try setting the \"xL-xS? switch\" to \"off\"." ]
+    if Spatches = no-patches or Lpatches = no-patches [ user-message "Are you using 50-snail6.png as geometry? If not, try setting the \"plot-xL-xS? switch\" to \"off\"." ]
   ]
 
   ; Set-up clock
-  if time-on-image?
+  if timestamp-on-image?
   [  create-clocks 1 [ set label (precision time 1) setxy (min-pxcor + nGrid / 5) (max-pycor - nGrid / 20) set size 0 ]  ]
 
   ; Setup (unchanging) constants
@@ -120,7 +120,7 @@ to reset
 
   ; Init save files
   set file-prefix retrieve-simul_info_string
-  ifelse save_timelapse_img? or record_vid? or save_all_plots?  [  set reset-success? initialize-saving   ]
+  ifelse save_timelapse_img? or record_vid? or save_all_plots? or save-xL-xS?  [  set setup-success? initialize-saving   ]
   [ set save-dir-name "N/A" ]
   display
 end
@@ -222,7 +222,8 @@ end
 
 to-report initialize-saving
   let success? true ; This will change to false if something goes wrong in the process.
-  if (save_timelapse_img? or record_vid? or save_all_plots?) and (save-dir-name = "N/A" or save-dir-name = "") [
+  if (save_timelapse_img? or record_vid? or save_all_plots? or save-xL-xS?) and (save-dir-name = "N/A" or save-dir-name = "") [
+    print "wft"
     carefully [      set save-dir-name user-directory    ]
     [ ;user-message "Results saving directory not selected."
       set success? false ; This will fall-into the "Saving to the save-dir-name failed." case in the down below.
@@ -247,18 +248,20 @@ end
 
 
 to go
-  if reset-success? = false
+  if setup-success? = false
   [ user-message "Reset status unsuccessful."    stop  ]
-  if save-dir-name != "N/A" and not file-exists? (word save-dir-name "iface-t0 " file-prefix ".png")
-  [ user-message "save-dir-name changed since resetting" set save-dir-name "N/A" set reset-success? false stop ]
+  if save-dir-name != "N/A" and not file-exists? (word save-dir-name "iface-t0 " file-prefix ".png") ; Trying to find the screenshot of the initial interface taken at "setup".
+  [ user-message "save-dir-name (probably) changed since \"setup\"" set save-dir-name "N/A" set setup-success? false stop ] ; If it's not found, tell the user that probably, you changed the save-dir after you pressed "setup"
 
   ; Check stop-conditions and apply necessary ending steps
   if time > endtime
   [
     ; Save
-    if record_vid? [  vid:save-recording (word file-prefix "_mov.mp4") ]
-    if save_timelapse_img? or record_vid? or save_all_plots?  [export-interface (word "iface-End " file-prefix ".png")]
-    if save_all_plots? [export-all-plots (word file-prefix "allplots.csv")]
+    if save_timelapse_img? or record_vid? or save_all_plots? or save-xL-xS?
+    [
+      set-current-directory save-dir-name
+      export-interface (word "iface-End " file-prefix ".png")
+    ]
 
     set run-index  run-index + 1
 
@@ -273,22 +276,25 @@ to go
 
     ; All-runs end and Export "xL-xS"
     if run-index >= N-runs [
-      if xL-xS? [export-plot "xL-xS" "xL-xS all runs.csv"]
+      if save-xL-xS? [export-plot "xL-xS" (word "xL-xS of " file-prefix  " " N-runs "-runs.csv")]
+      if record_vid? [  vid:save-recording (word file-prefix "_mov.mp4") ]
+      if save_all_plots? [export-all-plots (word file-prefix " - allplots.csv")]
+      set run-index  run-index - 1 ; for visual purpose
       stop
     ]
     ; Clear non-accumulative plots
     set-current-plot "Max Min dx_patch" clear-plot
     set-current-plot "Max Pon-patch" clear-plot
-    set-current-plot "Max - Min dx_patch" clear-plot
+;    set-current-plot "Max - Min dx_patch" clear-plot
   ]
 
   ; Visual/graph updates
   if show_enz? [ ask kinases [show-turtle] ask pptases [show-turtle] ]
   if not show_enz? [ ask kinases [hide-turtle] ask pptases [hide-turtle] ]
-  if time-on-image? [ ask clocks [ set label (precision time 1) ] ]
+  if timestamp-on-image? [ ask clocks [ set label (precision time 1) ] ]
   ask inpatches [ represent-x-as-patch-color ]
   set avg_x mean [x_patch] of inpatches
-  if xL-xS? [
+  if plot-xL-xS? [
     set-current-plot "xL-xS"
     set-current-plot-pen (word (run-index))
     plotxy time mean [x_patch] of Lpatches - mean [x_patch] of Spatches
@@ -316,8 +322,9 @@ to save_tlapse_img
   repeat nZeros [set $3digit_time insert-item 0 $3digit_time "0"]
   set $3digit_time (word $3digit_time inttime)
   set-current-directory save-dir-name
-  ifelse simple-savename? [    export-view (word run-index " t" $3digit_time ".png")      ]
-                          [    export-view (word file-prefix " t" $3digit_time ".png")    ]
+  export-view (word run-index " t" $3digit_time ".png")
+;  ifelse simple-savename? [    export-view (word run-index " t" $3digit_time ".png")      ]
+;                          [    export-view (word file-prefix " t" $3digit_time ".png")    ]
   set next_tlapse_time    next_tlapse_time + tlapse_interval
 end
 
@@ -538,14 +545,14 @@ end
 
 to-report retrieve-simul_info_string
   if Enzyme-Pair-Type = "memK-memP" [
-    report (word run-index " " (substring Calculation-Type 0 3) " " worldLength "um "
-      "on-off-cat-Km K " k_mkon " " k_koff " " k_mkcat " " k_mKm " "
-      "P " p_mkon " " p_koff " " memP_mkcat " " p_mKm    )  ]
+    report (word (substring Calculation-Type 0 3) " " worldLength "um "
+      "mkon-off-mkcat-mKm of memK - " k_mkon "-" k_koff "-" k_mkcat "-" k_mKm
+      "_ of memP - " p_mkon "-" p_koff "-" memP_mkcat "-" p_mKm    )  ]
 
   if Enzyme-Pair-Type = "memK-solP" [
-    report (word run-index " " (substring Calculation-Type 0 3) " " worldLength "um "
-      "k_on-off-cat-Km " k_mkon " " k_koff " " k_mkcat " " k_mKm " "
-      "p_cat_unitA-Km " solP_mkcat " " p_mKm    )  ]
+    report (word (substring Calculation-Type 0 3) " " worldLength "um "
+       "on-off-cat-Km of memK - " k_mkon "-" k_koff "-" k_mkcat "-" k_mKm
+      "_ of solP - " solP_mkcat "-" p_mKm    )  ]
 end
 
 
@@ -611,7 +618,7 @@ BUTTON
 125
 75
 NIL
-reset
+setup
 NIL
 1
 T
@@ -674,8 +681,8 @@ true
 true
 "" ""
 PENS
-"KIN" 1.0 2 -955883 true "" "if Calculation-Type = \"deterministic\" [plotxy time sum ([patch_k_density] of inpatches) * patchLength ^ 2]\nif Calculation-Type = \"stochastic\" [plotxy time count kinases]\n"
-"PPT" 1.0 2 -11221820 true "" "if Calculation-Type = \"deterministic\" [plotxy time sum ([patch_p_density] of inpatches) * patchLength ^ 2]\nif Calculation-Type = \"stochastic\" [plotxy time count pptases]\n"
+"K" 1.0 2 -955883 true "" "if Calculation-Type = \"deterministic\" [plotxy time sum ([patch_k_density] of inpatches) * patchLength ^ 2]\nif Calculation-Type = \"stochastic\" [plotxy time count kinases]\n"
+"P" 1.0 2 -11221820 true "" "if Calculation-Type = \"deterministic\" [plotxy time sum ([patch_p_density] of inpatches) * patchLength ^ 2]\nif Calculation-Type = \"stochastic\" [plotxy time count pptases]\n"
 
 INPUTBOX
 530
@@ -781,10 +788,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-233
-288
-416
-321
+269
+286
+414
+319
 world_pixel_length
 world_pixel_length
 100
@@ -811,8 +818,8 @@ true
 true
 "" ""
 PENS
-"KIN" 1.0 0 -3844592 true "" "plotxy time max [k_Pon] of patches"
-"PPT" 1.0 0 -13403783 true "" "plotxy time max [p_Pon] of patches"
+"K" 1.0 0 -3844592 true "" "plotxy time max [k_Pon] of patches"
+"P" 1.0 0 -13403783 true "" "plotxy time max [p_Pon] of patches"
 
 CHOOSER
 748
@@ -842,7 +849,7 @@ SWITCH
 724
 record_vid?
 record_vid?
-1
+0
 1
 -1000
 
@@ -920,7 +927,7 @@ vid_rec_intval
 vid_rec_intval
 10
 300
-50.0
+10.0
 10
 1
 NIL
@@ -935,7 +942,7 @@ tlapse_interval
 tlapse_interval
 0.5
 150
-1.0
+0.5
 0.5
 1
 s
@@ -985,10 +992,10 @@ worldLength / nGrid
 SWITCH
 24
 287
-164
+197
 320
-time-on-image?
-time-on-image?
+timestamp-on-image?
+timestamp-on-image?
 0
 1
 -1000
@@ -1094,24 +1101,24 @@ NIL
 1
 
 CHOOSER
-20
-217
-212
-262
+21
+209
+213
+254
 Calculation-Type
 Calculation-Type
 "stochastic" "deterministic"
 0
 
 CHOOSER
-222
-216
-414
-261
+223
+208
+415
+253
 Enzyme-Pair-Type
 Enzyme-Pair-Type
 "memK-memP" "memK-solP"
-0
+1
 
 INPUTBOX
 847
@@ -1164,9 +1171,9 @@ pert-angular wavenumber
 11
 
 MONITOR
-170
+205
 281
-227
+262
 326
 NIL
 time
@@ -1202,7 +1209,7 @@ CHOOSER
 N-runs
 N-runs
 1 2 3 4 5 9 10 20 30 40 50
-0
+2
 
 MONITOR
 850
@@ -1248,7 +1255,7 @@ BUTTON
 366
 168
 set-save-dir
-carefully [\nset save-dir-name user-directory\nset reset-success? false\n]\n[ \nuser-message (word \"Save directory unchanged.\")\n]
+carefully [\nset save-dir-name user-directory\nset setup-success? false\n]\n[ \nuser-message (word \"Save directory unchanged.\")\n]
 NIL
 1
 T
@@ -1262,10 +1269,10 @@ NIL
 SWITCH
 1266
 545
-1467
+1465
 578
-xL-xS?
-xL-xS?
+plot-xL-xS?
+plot-xL-xS?
 0
 1
 -1000
@@ -1379,7 +1386,7 @@ INPUTBOX
 806
 168
 save-dir-name
-C:\\Users\\Neil\\Dropbox\\github\\PIPpolarize\\results\\test\\
+C:\\Users\\Neil\\Dropbox\\github\\PIPpolarize\\results\\123\\
 1
 0
 String
@@ -1390,7 +1397,7 @@ MONITOR
 125
 126
 NIL
-reset-success?
+setup-success?
 17
 1
 11
@@ -1406,10 +1413,10 @@ Time setting
 1
 
 TEXTBOX
-22
-194
-172
-212
+23
+186
+173
+204
 Simulation Type Setting
 13
 0.0
@@ -1474,6 +1481,17 @@ File I/O
 13
 0.0
 1
+
+SWITCH
+1266
+800
+1466
+833
+save-xL-xS?
+save-xL-xS?
+0
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?

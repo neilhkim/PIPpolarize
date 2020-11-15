@@ -261,8 +261,6 @@ to go
       set-current-directory save-dir-name
       export-interface (word "iface-End " file-prefix ".png")
     ]
-    if record_vid? [  vid:save-recording (word file-prefix "_mov.mp4") ]
-    if save_all_plots? [export-all-plots (word file-prefix " - allplots.csv")]
 
     set run-index  run-index + 1
 
@@ -278,6 +276,9 @@ to go
     ; All-runs end and Export "xL-xS"
     if run-index >= N-runs [
       if save-xL-xS? [export-plot "xL-xS" (word file-prefix "xL-xS of " N-runs " runs.csv")]
+      if record_vid? [  vid:save-recording (word file-prefix "_mov.mp4") ]
+      if save_all_plots? [export-all-plots (word file-prefix " - allplots.csv")]
+      set run-index  run-index - 1 ; for visual purpose
       stop
     ]
     ; Clear non-accumulative plots

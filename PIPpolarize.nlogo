@@ -262,7 +262,7 @@ to go
   if setup-success? = false
   [ user-message "Reset status unsuccessful."    stop  ]
   if save-dir-name != "N/A" and not file-exists? (word save-dir-name "iface-t0 " file-prefix ".png") ; Trying to find the screenshot of the initial interface taken at "setup".
-  [ user-message "save-dir-name (probably) changed since \"setup\"" set save-dir-name "N/A" set setup-success? false stop ] ; If it's not found, tell the user that probably, you changed the save-dir after you pressed "setup"
+  [ user-message "Needs to redo \"setup\"" set save-dir-name "N/A" set setup-success? false stop ] ; If it's not found, tell the user that probably, you changed the save-dir after you pressed "setup"
 
   if okay-to-save? = false [
     ifelse "no" = user-one-of (word "Saving result file(s) to " save-dir-name " - Okay?") ["yes" "no"]
@@ -857,7 +857,7 @@ SWITCH
 697
 save_timelapse_img?
 save_timelapse_img?
-0
+1
 1
 -1000
 
@@ -868,7 +868,7 @@ SWITCH
 724
 record_vid?
 record_vid?
-0
+1
 1
 -1000
 
@@ -1405,7 +1405,7 @@ INPUTBOX
 806
 168
 save-dir-name
-C:\\Users\\Neil\\Dropbox\\github\\PIPpolarize\\results\\123\\
+N/A
 1
 0
 String

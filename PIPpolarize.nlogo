@@ -1094,20 +1094,20 @@ NIL
 1
 
 CHOOSER
-20
-217
-212
-262
+21
+209
+213
+254
 Calculation-Type
 Calculation-Type
 "stochastic" "deterministic"
 0
 
 CHOOSER
-222
-216
-414
-261
+223
+208
+415
+253
 Enzyme-Pair-Type
 Enzyme-Pair-Type
 "memK-memP" "memK-solP"
@@ -1406,10 +1406,10 @@ Time setting
 1
 
 TEXTBOX
-22
-194
-172
-212
+23
+186
+173
+204
 Simulation Type Setting
 13
 0.0

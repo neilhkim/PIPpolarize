@@ -579,10 +579,10 @@ to click-x-up
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-16
-332
-424
-741
+4
+333
+412
+742
 -1
 -1
 8.0
@@ -678,10 +678,10 @@ PENS
 "PPT" 1.0 2 -11221820 true "" "if Calculation-Type = \"deterministic\" [plotxy time sum ([patch_p_density] of inpatches) * patchLength ^ 2]\nif Calculation-Type = \"stochastic\" [plotxy time count pptases]\n"
 
 INPUTBOX
-465
-370
-553
-430
+501
+374
+589
+434
 k_mkon
 0.1
 1
@@ -689,10 +689,10 @@ k_mkon
 Number
 
 INPUTBOX
-561
-370
-650
-430
+597
+374
+686
+434
 k_koff
 0.7
 1
@@ -700,10 +700,10 @@ k_koff
 Number
 
 INPUTBOX
-658
-370
-748
-430
+694
+374
+784
+434
 k_mkcat
 10.0
 1
@@ -711,10 +711,10 @@ k_mkcat
 Number
 
 INPUTBOX
-466
-484
-554
-544
+502
+488
+590
+548
 p_mkon
 0.02
 1
@@ -722,10 +722,10 @@ p_mkon
 Number
 
 INPUTBOX
-560
-483
-649
-543
+596
+487
+685
+547
 p_koff
 0.1
 1
@@ -733,10 +733,10 @@ p_koff
 Number
 
 INPUTBOX
-658
-447
-750
-507
+694
+451
+786
+511
 memP_mkcat
 15.0
 1
@@ -755,10 +755,10 @@ show_enz?
 -1000
 
 INPUTBOX
-562
-276
-649
-336
+598
+280
+685
+340
 D_pip
 2.0
 1
@@ -815,20 +815,20 @@ PENS
 "PPT" 1.0 0 -13403783 true "" "plotxy time max [p_Pon] of patches"
 
 CHOOSER
-682
-287
-774
-332
+719
+294
+811
+339
 nGrid
 nGrid
 1 2 3 4 5 6 7 9 10 12 15 16 18 20 24 25 27 30 34 36 40 41 50 51 59 60 64 66 70 89 90 96 100 150 200 250 350 500
 22
 
 SWITCH
-466
-619
-638
+480
+786
 652
+819
 save_timelapse_img?
 save_timelapse_img?
 0
@@ -836,10 +836,10 @@ save_timelapse_img?
 -1000
 
 SWITCH
-652
-620
-816
-653
+666
+787
+830
+820
 record_vid?
 record_vid?
 1
@@ -858,10 +858,10 @@ save_all_plots?
 -1000
 
 INPUTBOX
-470
-180
-561
-240
+506
+184
+597
+244
 endtime
 2.0
 1
@@ -880,10 +880,10 @@ C:\\Users\\Neil\\Dropbox\\Research\\20200824\\confinements\\500-snail6.png
 String
 
 INPUTBOX
-779
-272
-857
-332
+816
+279
+894
+339
 worldLength
 30.0
 1
@@ -891,10 +891,10 @@ worldLength
 Number
 
 INPUTBOX
-565
-180
-649
-240
+601
+184
+685
+244
 timestep
 0.01
 1
@@ -912,10 +912,10 @@ geometry-setup
 1
 
 SLIDER
-650
-659
-815
-692
+664
+826
+829
+859
 vid_rec_intval
 vid_rec_intval
 10
@@ -927,10 +927,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-466
-658
-638
-691
+480
+825
+652
+858
 tlapse_interval
 tlapse_interval
 0.5
@@ -972,10 +972,10 @@ PENS
 "min" 1.0 0 -7500403 true "" "if inpatches != 0 [plotxy time min [dx_patch] of inpatches ]"
 
 MONITOR
-861
-287
-937
-332
+898
+294
+974
+339
 patchLength
 worldLength / nGrid
 7
@@ -994,10 +994,10 @@ time-on-image?
 -1000
 
 INPUTBOX
-755
-370
-845
-430
+791
+374
+881
+434
 k_mKm
 2.0
 1
@@ -1005,10 +1005,10 @@ k_mKm
 Number
 
 INPUTBOX
-756
-483
-843
-543
+792
+487
+879
+547
 p_mKm
 0.5
 1
@@ -1016,10 +1016,10 @@ p_mKm
 Number
 
 INPUTBOX
-658
-512
-751
-572
+694
+516
+787
+576
 solP_mkcat
 15.0
 1
@@ -1027,10 +1027,10 @@ solP_mkcat
 Number
 
 INPUTBOX
-466
-276
-555
-336
+502
+280
+591
+340
 D_enz
 0.2
 1
@@ -1143,9 +1143,9 @@ NIL
 
 SWITCH
 1508
-477
+508
 1709
-510
+541
 smaller-part-test?
 smaller-part-test?
 1
@@ -1153,7 +1153,7 @@ smaller-part-test?
 -1000
 
 MONITOR
-1565
+1507
 425
 1709
 470
@@ -1195,20 +1195,20 @@ PENS
 "x0.5" 1.0 0 -16777216 true "" ""
 
 CHOOSER
-685
-187
-778
-232
+721
+191
+814
+236
 N-runs
 N-runs
 1 2 3 4 5 9 10 20 30 40 50
 0
 
 MONITOR
-785
-188
-863
-233
+821
+192
+899
+237
 Current run
 run-index + 1
 17
@@ -1271,10 +1271,10 @@ xL-xS?
 -1000
 
 SWITCH
-466
-699
-638
-732
+480
+866
+652
+899
 simple-savename?
 simple-savename?
 1
@@ -1308,36 +1308,36 @@ TEXTBOX
 294
 1718
 329
-For deterministic simulation only
+Deterministic Simulation Settings
 13
 0.0
 1
 
 TEXTBOX
-472
-253
-622
-271
+508
+257
+658
+275
 Diffusion constants
 13
 0.0
 1
 
 TEXTBOX
-469
-347
-619
-365
+505
+351
+655
+369
 Kinase parameters
 13
 0.0
 1
 
 TEXTBOX
-468
-448
-618
-466
+504
+452
+654
+470
 Phosphatase parameters
 13
 0.0
@@ -1354,20 +1354,20 @@ Plots
 1
 
 TEXTBOX
-473
-593
-666
-612
+487
+760
+680
+779
 Saving Images and Videos
 13
 0.0
 1
 
 TEXTBOX
-688
-247
-892
-279
+725
+254
+929
+286
 Membrane size and patches
 13
 0.0
@@ -1396,10 +1396,10 @@ reset-success?
 11
 
 TEXTBOX
-474
-159
-624
-177
+510
+163
+660
+181
 Time setting
 13
 0.0
@@ -1410,16 +1410,16 @@ TEXTBOX
 152
 165
 170
-Simulation type
+Simulation Type Setting
 13
 0.0
 1
 
 TEXTBOX
-688
-164
-838
-182
+724
+168
+874
+186
 Simulation Runs
 13
 0.0
@@ -1430,7 +1430,7 @@ TEXTBOX
 225
 167
 243
-Visual
+Visual Settings
 13
 0.0
 1
@@ -1441,6 +1441,16 @@ TEXTBOX
 927
 33
 Starting condition
+13
+0.0
+1
+
+TEXTBOX
+1512
+479
+1662
+497
+Special Settings\t
 13
 0.0
 1

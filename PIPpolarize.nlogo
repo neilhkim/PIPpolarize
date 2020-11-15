@@ -104,7 +104,7 @@ to setup
   ]
 
   ; Set-up clock
-  if time-on-image?
+  if timestamp-on-image?
   [  create-clocks 1 [ set label (precision time 1) setxy (min-pxcor + nGrid / 5) (max-pycor - nGrid / 20) set size 0 ]  ]
 
   ; Setup (unchanging) constants
@@ -285,7 +285,7 @@ to go
   ; Visual/graph updates
   if show_enz? [ ask kinases [show-turtle] ask pptases [show-turtle] ]
   if not show_enz? [ ask kinases [hide-turtle] ask pptases [hide-turtle] ]
-  if time-on-image? [ ask clocks [ set label (precision time 1) ] ]
+  if timestamp-on-image? [ ask clocks [ set label (precision time 1) ] ]
   ask inpatches [ represent-x-as-patch-color ]
   set avg_x mean [x_patch] of inpatches
   if xL-xS? [
@@ -781,10 +781,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-233
-288
-416
-321
+269
+286
+414
+319
 world_pixel_length
 world_pixel_length
 100
@@ -985,10 +985,10 @@ worldLength / nGrid
 SWITCH
 24
 287
-164
+197
 320
-time-on-image?
-time-on-image?
+timestamp-on-image?
+timestamp-on-image?
 0
 1
 -1000
@@ -1164,9 +1164,9 @@ pert-angular wavenumber
 11
 
 MONITOR
-170
+205
 281
-227
+262
 326
 NIL
 time

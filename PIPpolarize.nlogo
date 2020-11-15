@@ -2,6 +2,7 @@ extensions [ vid ]
 
 globals [
   setup-success?
+  okay-to-save?
   run-index
 
   ; Internally set Constants ;
@@ -61,6 +62,7 @@ to setup
   clear-all
   display
   set setup-success? true ; It will change to false if something goes wrong in the resetting process.
+  set okay-to-save? false
 
   RESET-TICKS
 
@@ -222,6 +224,7 @@ end
 
 to-report initialize-saving
   let success? true ; This will change to false if something goes wrong in the process.
+
   if (save_timelapse_img? or record_vid? or save_all_plots? or save-xL-xS?) and (save-dir-name = "N/A" or save-dir-name = "") [
     print "wft"
     carefully [      set save-dir-name user-directory    ]
@@ -230,18 +233,26 @@ to-report initialize-saving
       set save-dir-name "N/A"
     ]
   ]
-  if record_vid? [ carefully [vid:start-recorder]
-    [ user-message "Video init failed. Select a directory to dump the video (if possible)."
-      set-current-directory user-directory
-      carefully [vid:save-recording (word "dump_mov.mp4")]
-      [ user-message "If there was any content, the video is dumped as dump_mov.mp4."]
+
+  if record_vid? [
+    if vid:recorder-status = "recording"
+    [
+      user-message "Video init failed. Previous video capture was not finished. Attempting to save previous video as dump_mov.mp4."
+      carefully [vid:save-recording (word save-dir-name "dump_mov.mp4")]
+      [ user-message (word "Dumping previous video dumping failed. Error: " error-message)]
+    ]
+    carefully [vid:start-recorder]
+    [
+      user-message  (word "Video init failed. Error : " error-message)
       set success? false
     ]
   ]
+
   carefully [ export-interface (word save-dir-name "iface-t0 " file-prefix ".png") ] ; If this directory does not exist, this will spit out an error message.
-    [ user-message "Saving to the save-dir-name failed. Make sure you've put in a valid directory"
-      set success? false
-      set save-dir-name "N/A"
+  [
+    user-message "Saving to the save-dir-name failed. Make sure you've put in a valid directory"
+    set success? false
+    set save-dir-name "N/A"
   ]
   report success?
 end
@@ -253,9 +264,11 @@ to go
   if save-dir-name != "N/A" and not file-exists? (word save-dir-name "iface-t0 " file-prefix ".png") ; Trying to find the screenshot of the initial interface taken at "setup".
   [ user-message "save-dir-name (probably) changed since \"setup\"" set save-dir-name "N/A" set setup-success? false stop ] ; If it's not found, tell the user that probably, you changed the save-dir after you pressed "setup"
 
-
-  if "no" = user-one-of (word "Saving result file(s) to " save-dir-name " - Okay?") ["yes" "no"]
-    [stop]
+  if okay-to-save? = false [
+    ifelse "no" = user-one-of (word "Saving result file(s) to " save-dir-name " - Okay?") ["yes" "no"]
+    [  stop  ]
+    [ set okay-to-save? true ]
+  ]
 
 
 
@@ -1034,7 +1047,7 @@ INPUTBOX
 816
 616
 solP_mkcat
-15.0
+0.15
 1
 0
 Number

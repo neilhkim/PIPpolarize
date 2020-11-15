@@ -1,7 +1,7 @@
 extensions [ vid ]
 
 globals [
-  reset-success?
+  setup-success?
   run-index
 
   ; Internally set Constants ;
@@ -60,7 +60,7 @@ patches-own [
 to setup
   clear-all
   display
-  set reset-success? true ; It will change to false if something goes wrong in the resetting process.
+  set setup-success? true ; It will change to false if something goes wrong in the resetting process.
 
   RESET-TICKS
 
@@ -93,14 +93,14 @@ to setup
   initialize_patches
 
   ; L patch and S patch
-  if xL-xS? [
+  if plot-xL-xS? [
     set Lpatches no-patches
     set Spatches no-patches
     ask inpatches [
       if pxcor >= 24 / 50 * nGrid and pxcor < 26 / 50 * nGrid and pycor >= 24 / 50 * nGrid and pycor < 26 / 50 * nGrid [ set Lpatches (patch-set Lpatches self)]
       if pxcor >= 45 / 50 * nGrid and pxcor < 47 / 50 * nGrid and pycor >= 44 / 50 * nGrid and pycor < 46 / 50 * nGrid [ set Spatches (patch-set Spatches self)]
     ]
-    if Spatches = no-patches or Lpatches = no-patches [ user-message "Are you using 50-snail6.png as geometry? If not, try setting the \"xL-xS? switch\" to \"off\"." ]
+    if Spatches = no-patches or Lpatches = no-patches [ user-message "Are you using 50-snail6.png as geometry? If not, try setting the \"plot-xL-xS? switch\" to \"off\"." ]
   ]
 
   ; Set-up clock
@@ -120,7 +120,7 @@ to setup
 
   ; Init save files
   set file-prefix retrieve-simul_info_string
-  ifelse save_timelapse_img? or record_vid? or save_all_plots?  [  set reset-success? initialize-saving   ]
+  ifelse save_timelapse_img? or record_vid? or save_all_plots?  [  set setup-success? initialize-saving   ]
   [ set save-dir-name "N/A" ]
   display
 end
@@ -247,17 +247,21 @@ end
 
 
 to go
-  if reset-success? = false
+  if setup-success? = false
   [ user-message "Reset status unsuccessful."    stop  ]
-  if save-dir-name != "N/A" and not file-exists? (word save-dir-name "iface-t0 " file-prefix ".png")
-  [ user-message "save-dir-name changed since resetting" set save-dir-name "N/A" set reset-success? false stop ]
+  if save-dir-name != "N/A" and not file-exists? (word save-dir-name "iface-t0 " file-prefix ".png") ; Trying to find the screenshot of the initial interface taken at "setup".
+  [ user-message "save-dir-name (probably) changed since \"setup\"" set save-dir-name "N/A" set setup-success? false stop ] ; If it's not found, tell the user that probably, you changed the save-dir after you pressed "setup"
 
   ; Check stop-conditions and apply necessary ending steps
   if time > endtime
   [
     ; Save
+    if save_timelapse_img? or record_vid? or save_all_plots? or save-xL-xS?
+    [
+      set-current-directory save-dir-name
+      export-interface (word "iface-End " file-prefix ".png")
+    ]
     if record_vid? [  vid:save-recording (word file-prefix "_mov.mp4") ]
-    if save_timelapse_img? or record_vid? or save_all_plots?  [export-interface (word "iface-End " file-prefix ".png")]
     if save_all_plots? [export-all-plots (word file-prefix " - allplots.csv")]
 
     set run-index  run-index + 1
@@ -273,7 +277,7 @@ to go
 
     ; All-runs end and Export "xL-xS"
     if run-index >= N-runs [
-      if xL-xS? [export-plot "xL-xS" (word file-prefix "xL-xS of " N-runs " runs.csv")]
+      if save-xL-xS? [export-plot "xL-xS" (word file-prefix "xL-xS of " N-runs " runs.csv")]
       stop
     ]
     ; Clear non-accumulative plots
@@ -288,7 +292,7 @@ to go
   if timestamp-on-image? [ ask clocks [ set label (precision time 1) ] ]
   ask inpatches [ represent-x-as-patch-color ]
   set avg_x mean [x_patch] of inpatches
-  if xL-xS? [
+  if plot-xL-xS? [
     set-current-plot "xL-xS"
     set-current-plot-pen (word (run-index))
     plotxy time mean [x_patch] of Lpatches - mean [x_patch] of Spatches
@@ -674,8 +678,8 @@ true
 true
 "" ""
 PENS
-"KIN" 1.0 2 -955883 true "" "if Calculation-Type = \"deterministic\" [plotxy time sum ([patch_k_density] of inpatches) * patchLength ^ 2]\nif Calculation-Type = \"stochastic\" [plotxy time count kinases]\n"
-"PPT" 1.0 2 -11221820 true "" "if Calculation-Type = \"deterministic\" [plotxy time sum ([patch_p_density] of inpatches) * patchLength ^ 2]\nif Calculation-Type = \"stochastic\" [plotxy time count pptases]\n"
+"K" 1.0 2 -955883 true "" "if Calculation-Type = \"deterministic\" [plotxy time sum ([patch_k_density] of inpatches) * patchLength ^ 2]\nif Calculation-Type = \"stochastic\" [plotxy time count kinases]\n"
+"P" 1.0 2 -11221820 true "" "if Calculation-Type = \"deterministic\" [plotxy time sum ([patch_p_density] of inpatches) * patchLength ^ 2]\nif Calculation-Type = \"stochastic\" [plotxy time count pptases]\n"
 
 INPUTBOX
 530
@@ -811,8 +815,8 @@ true
 true
 "" ""
 PENS
-"KIN" 1.0 0 -3844592 true "" "plotxy time max [k_Pon] of patches"
-"PPT" 1.0 0 -13403783 true "" "plotxy time max [p_Pon] of patches"
+"K" 1.0 0 -3844592 true "" "plotxy time max [k_Pon] of patches"
+"P" 1.0 0 -13403783 true "" "plotxy time max [p_Pon] of patches"
 
 CHOOSER
 748
@@ -1248,7 +1252,7 @@ BUTTON
 366
 168
 set-save-dir
-carefully [\nset save-dir-name user-directory\nset reset-success? false\n]\n[ \nuser-message (word \"Save directory unchanged.\")\n]
+carefully [\nset save-dir-name user-directory\nset setup-success? false\n]\n[ \nuser-message (word \"Save directory unchanged.\")\n]
 NIL
 1
 T
@@ -1262,10 +1266,10 @@ NIL
 SWITCH
 1266
 545
-1467
+1465
 578
-xL-xS?
-xL-xS?
+plot-xL-xS?
+plot-xL-xS?
 0
 1
 -1000
@@ -1390,7 +1394,7 @@ MONITOR
 125
 126
 NIL
-reset-success?
+setup-success?
 17
 1
 11
@@ -1474,6 +1478,17 @@ File I/O
 13
 0.0
 1
+
+SWITCH
+1266
+800
+1466
+833
+save-xL-xS?
+save-xL-xS?
+0
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?

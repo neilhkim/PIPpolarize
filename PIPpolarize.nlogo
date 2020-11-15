@@ -226,7 +226,6 @@ to-report initialize-saving
   let success? true ; This will change to false if something goes wrong in the process.
 
   if (save_timelapse_img? or record_vid? or save_all_plots? or save-xL-xS?) and (save-dir-name = "N/A" or save-dir-name = "") [
-    print "wft"
     carefully [      set save-dir-name user-directory    ]
     [ ;user-message "Results saving directory not selected."
       set success? false ; This will fall-into the "Saving to the save-dir-name failed." case in the down below.

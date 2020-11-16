@@ -264,7 +264,7 @@ to go
   if save-dir-name != "N/A" and not file-exists? (word save-dir-name "iface-t0 " file-prefix ".png") ; Trying to find the screenshot of the initial interface taken at "setup".
   [ user-message "Needs to redo \"setup\"" set save-dir-name "N/A" set setup-success? false stop ] ; If it's not found, tell the user that probably, you changed the save-dir after you pressed "setup"
 
-  if okay-to-save? = false [
+  if save-dir-name != "N/A" and okay-to-save? = false [
     ifelse "no" = user-one-of (word "Saving result file(s) to " save-dir-name " - Okay?") ["yes" "no"]
     [  stop  ]
     [ set okay-to-save? true ]
@@ -1508,7 +1508,7 @@ SWITCH
 833
 save-xL-xS?
 save-xL-xS?
-0
+1
 1
 -1000
 

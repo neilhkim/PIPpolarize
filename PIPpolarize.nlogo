@@ -962,7 +962,7 @@ tlapse_interval
 tlapse_interval
 0.5
 150
-0.5
+1.0
 0.5
 1
 s

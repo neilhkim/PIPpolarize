@@ -858,7 +858,7 @@ SWITCH
 727
 save_timelapse_img?
 save_timelapse_img?
-1
+0
 1
 -1000
 
@@ -890,7 +890,7 @@ INPUTBOX
 626
 314
 endtime
-2.0
+45.0
 1
 0
 Number
@@ -901,7 +901,7 @@ INPUTBOX
 825
 102
 input-geometry-fname
-C:\\Users\\Neil\\Dropbox\\Research\\20200824\\confinements\\500-snail6.png
+C:\\Users\\Neil\\Dropbox\\github\\PIPpolarize\\input-geometry\\50-snail6.png
 1
 0
 String
@@ -1070,7 +1070,7 @@ INPUTBOX
 1706
 159
 pert-wavelength
-1.0
+0.0
 1
 0
 Number
@@ -1098,7 +1098,7 @@ INPUTBOX
 1599
 158
 perturb-amplitude
-1.0
+0.0
 1
 0
 Number
@@ -1406,7 +1406,7 @@ INPUTBOX
 826
 168
 save-dir-name
-N/A
+0
 1
 0
 String

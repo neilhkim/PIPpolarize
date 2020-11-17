@@ -123,6 +123,7 @@ to setup
 
   ; Init save files
   set file-prefix retrieve-simul_info_string
+  output-print file-prefix
   ifelse save_timelapse_img? or record_vid? or save_all_plots? or save-xL-xS?  [  set setup-success? initialize-saving   ]
   [ set save-dir-name "N/A" ]
   display
@@ -565,13 +566,13 @@ end
 to-report retrieve-simul_info_string
   if Enzyme-Pair-Type = "memK-memP" [
     report (word (substring Calculation-Type 0 3) " " worldLength "um "
-      "mkon-off-mkcat-mKm of memK - " k_mkon "-" k_koff "-" k_mkcat "-" k_mKm
-      "_ of memP - " p_mkon "-" p_koff "-" memP_mkcat "-" p_mKm    )  ]
+      "mkon-off-mkcat-mKm of memK " k_mkon "-" k_koff "-" k_mkcat "-" k_mKm
+      " memP " p_mkon "-" p_koff "-" memP_mkcat "-" p_mKm    )  ]
 
   if Enzyme-Pair-Type = "memK-solP" [
     report (word (substring Calculation-Type 0 3) " " worldLength "um "
-       "on-off-cat-Km of memK - " k_mkon "-" k_koff "-" k_mkcat "-" k_mKm
-      "_ of solP - " solP_mkcat "-" p_mKm    )  ]
+       "on-off-cat-Km of memK " k_mkon "-" k_koff "-" k_mkcat "-" k_mKm
+      " mmkcat-mKm of solP " solP_mkcat "-" p_mKm    )  ]
 end
 
 
@@ -605,10 +606,10 @@ to click-x-up
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-11
-375
-419
-784
+10
+421
+418
+830
 -1
 -1
 8.0
@@ -705,9 +706,9 @@ PENS
 
 INPUTBOX
 530
-414
+444
 618
-474
+504
 k_mkon
 0.1
 1
@@ -716,9 +717,9 @@ Number
 
 INPUTBOX
 626
-414
+444
 715
-474
+504
 k_koff
 0.7
 1
@@ -727,9 +728,9 @@ Number
 
 INPUTBOX
 723
-414
+444
 813
-474
+504
 k_mkcat
 10.0
 1
@@ -738,9 +739,9 @@ Number
 
 INPUTBOX
 531
-528
+558
 619
-588
+618
 p_mkon
 0.02
 1
@@ -749,9 +750,9 @@ Number
 
 INPUTBOX
 625
-527
+557
 714
-587
+617
 p_koff
 0.1
 1
@@ -760,9 +761,9 @@ Number
 
 INPUTBOX
 723
-491
+521
 815
-551
+581
 memP_mkcat
 15.0
 1
@@ -770,10 +771,10 @@ memP_mkcat
 Number
 
 SWITCH
-24
-331
-161
-364
+23
+377
+160
+410
 show_enz?
 show_enz?
 0
@@ -782,9 +783,9 @@ show_enz?
 
 INPUTBOX
 627
-320
+350
 714
-380
+410
 D_pip
 2.0
 1
@@ -792,10 +793,10 @@ D_pip
 Number
 
 SLIDER
-172
-331
-415
-364
+171
+377
+414
+410
 enz_size
 enz_size
 0
@@ -807,10 +808,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-269
-286
-414
-319
+268
+332
+413
+365
 world_pixel_length
 world_pixel_length
 100
@@ -842,9 +843,9 @@ PENS
 
 CHOOSER
 748
-334
+364
 840
-379
+409
 nGrid
 nGrid
 1 2 3 4 5 6 7 9 10 12 15 16 18 20 24 25 27 30 34 36 40 41 50 51 59 60 64 66 70 89 90 96 100 150 200 250 350 500
@@ -852,9 +853,9 @@ nGrid
 
 SWITCH
 534
-664
+694
 706
-697
+727
 save_timelapse_img?
 save_timelapse_img?
 1
@@ -863,9 +864,9 @@ save_timelapse_img?
 
 SWITCH
 733
-691
+721
 853
-724
+754
 record_vid?
 record_vid?
 1
@@ -885,9 +886,9 @@ save_all_plots?
 
 INPUTBOX
 535
-224
+254
 626
-284
+314
 endtime
 2.0
 1
@@ -897,7 +898,7 @@ Number
 INPUTBOX
 376
 32
-805
+825
 102
 input-geometry-fname
 C:\\Users\\Neil\\Dropbox\\Research\\20200824\\confinements\\500-snail6.png
@@ -907,9 +908,9 @@ String
 
 INPUTBOX
 845
-319
+349
 923
-379
+409
 worldLength
 30.0
 1
@@ -918,9 +919,9 @@ Number
 
 INPUTBOX
 630
-224
+254
 714
-284
+314
 timestep
 0.01
 1
@@ -939,9 +940,9 @@ geometry-setup
 
 SLIDER
 731
-730
+760
 853
-763
+793
 vid_rec_intval
 vid_rec_intval
 10
@@ -954,14 +955,14 @@ HORIZONTAL
 
 SLIDER
 534
-703
+733
 706
-736
+766
 tlapse_interval
 tlapse_interval
 0.5
 150
-0.5
+1.0
 0.5
 1
 s
@@ -999,9 +1000,9 @@ PENS
 
 MONITOR
 927
-334
+364
 1003
-379
+409
 patchLength
 worldLength / nGrid
 7
@@ -1009,10 +1010,10 @@ worldLength / nGrid
 11
 
 SWITCH
-24
-287
-197
-320
+23
+333
+196
+366
 timestamp-on-image?
 timestamp-on-image?
 0
@@ -1021,9 +1022,9 @@ timestamp-on-image?
 
 INPUTBOX
 820
-414
+444
 910
-474
+504
 k_mKm
 2.0
 1
@@ -1032,9 +1033,9 @@ Number
 
 INPUTBOX
 821
-527
+557
 908
-587
+617
 p_mKm
 0.5
 1
@@ -1043,9 +1044,9 @@ Number
 
 INPUTBOX
 723
-556
+586
 816
-616
+646
 solP_mkcat
 0.15
 1
@@ -1054,9 +1055,9 @@ Number
 
 INPUTBOX
 531
-320
+350
 620
-380
+410
 D_enz
 0.2
 1
@@ -1120,20 +1121,20 @@ NIL
 1
 
 CHOOSER
-21
-209
-213
-254
+20
+255
+212
+300
 Calculation-Type
 Calculation-Type
 "stochastic" "deterministic"
 0
 
 CHOOSER
-223
-208
-415
-253
+222
+254
+414
+299
 Enzyme-Pair-Type
 Enzyme-Pair-Type
 "memK-memP" "memK-solP"
@@ -1190,10 +1191,10 @@ pert-angular wavenumber
 11
 
 MONITOR
-205
-281
-262
-326
+204
+327
+261
+372
 NIL
 time
 3
@@ -1222,9 +1223,9 @@ PENS
 
 CHOOSER
 750
-231
+261
 843
-276
+306
 N-runs
 N-runs
 1 2 3 4 5 9 10 20 30 40 50
@@ -1232,9 +1233,9 @@ N-runs
 
 MONITOR
 850
-232
+262
 928
-277
+307
 Current run
 run-index + 1
 17
@@ -1298,9 +1299,9 @@ plot-xL-xS?
 
 SWITCH
 534
-744
+774
 706
-777
+807
 simple-savename?
 simple-savename?
 1
@@ -1341,9 +1342,9 @@ Deterministic Simulation Settings
 
 TEXTBOX
 537
-297
+327
 687
-315
+345
 Diffusion constants
 13
 0.0
@@ -1351,9 +1352,9 @@ Diffusion constants
 
 TEXTBOX
 534
-391
+421
 684
-409
+439
 Kinase parameters
 13
 0.0
@@ -1361,9 +1362,9 @@ Kinase parameters
 
 TEXTBOX
 533
-492
+522
 683
-510
+540
 Phosphatase parameters
 13
 0.0
@@ -1381,9 +1382,9 @@ Plots
 
 TEXTBOX
 536
-637
+667
 729
-656
+686
 Saving Images and Videos
 13
 0.0
@@ -1391,9 +1392,9 @@ Saving Images and Videos
 
 TEXTBOX
 754
-294
+324
 958
-326
+356
 Membrane size and patches
 13
 0.0
@@ -1402,7 +1403,7 @@ Membrane size and patches
 INPUTBOX
 377
 104
-806
+826
 168
 save-dir-name
 N/A
@@ -1423,19 +1424,19 @@ setup-success?
 
 TEXTBOX
 539
-203
+233
 689
-221
+251
 Time setting
 13
 0.0
 1
 
 TEXTBOX
-23
-186
-173
-204
+22
+232
+172
+250
 Simulation Type Setting
 13
 0.0
@@ -1443,19 +1444,19 @@ Simulation Type Setting
 
 TEXTBOX
 753
-208
+238
 903
-226
+256
 Simulation Runs
 13
 0.0
 1
 
 TEXTBOX
-24
-267
-174
-285
+23
+313
+173
+331
 Visual Settings
 13
 0.0
@@ -1511,6 +1512,23 @@ save-xL-xS?
 1
 1
 -1000
+
+OUTPUT
+257
+171
+825
+209
+9
+
+TEXTBOX
+199
+178
+254
+196
+File Prefix
+12
+0.0
+1
 
 @#$#@#$#@
 ## WHAT IS IT?

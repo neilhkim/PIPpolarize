@@ -62,7 +62,7 @@ patches-own [
 to setup
   clear-all
   display
-  set setup-success? true ; It will change to false if something goes wrong in the resetting process.
+  set setup-success? true ; It will change to false if something goes wrong in the setup process.
   set okay-to-save? false
 
   RESET-TICKS
@@ -261,7 +261,7 @@ end
 
 to go
   if setup-success? = false
-  [ user-message "Reset status unsuccessful."    stop  ]
+  [ user-message "Setup status unsuccessful."    stop  ]
   if save-dir-name != "N/A" and not file-exists? (word save-dir-name "iface-t0 " file-prefix ".png") ; Trying to find the screenshot of the initial interface taken at "setup".
   [ user-message "Needs to redo \"setup\"" set save-dir-name "N/A" set setup-success? false stop ] ; If it's not found, tell the user that probably, you changed the save-dir after you pressed "setup"
 
@@ -1406,7 +1406,7 @@ INPUTBOX
 826
 168
 save-dir-name
-0
+C:\\Users\\Neil\\Dropbox\\github\\PIPpolarize\\results\\memP 1 run tlapse 1s\\
 1
 0
 String

@@ -342,7 +342,7 @@ to save_tlapse_img
   repeat nZeros [set $3digit_time insert-item 0 $3digit_time "0"]
   set $3digit_time (word $3digit_time inttime)
   set-current-directory save-dir-name
-  export-view (word run-index " t" $3digit_time ".png")
+  export-view (word save-dir-name run-index " t" $3digit_time ".png")
 ;  ifelse simple-savename? [    export-view (word run-index " t" $3digit_time ".png")      ]
 ;                          [    export-view (word file-prefix " t" $3digit_time ".png")    ]
   set next_tlapse_time    next_tlapse_time + tlapse_interval
@@ -777,7 +777,7 @@ SWITCH
 410
 show_enz?
 show_enz?
-0
+1
 1
 -1000
 
@@ -923,7 +923,7 @@ INPUTBOX
 714
 314
 timestep
-0.01
+0.02
 1
 0
 Number
@@ -962,7 +962,7 @@ tlapse_interval
 tlapse_interval
 0.5
 150
-1.0
+5.0
 0.5
 1
 s
@@ -1406,7 +1406,7 @@ INPUTBOX
 826
 168
 save-dir-name
-C:\\Users\\Neil\\Dropbox\\github\\PIPpolarize\\results\\memP 1 run tlapse 1s\\
+N/A
 1
 0
 String

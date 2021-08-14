@@ -479,9 +479,9 @@ to move
   ; Move enzyems
   if Calculation-Type = "stochastic" [
     ask kinases
-    [ if ( n_neighbors > 0 )    [     if random-float 1 < 1 - Pstay [ move-to one-of real_neighbors]     ]  ]
+    [ if ( n_neighbors > 0 )    [     if random-float 1 < (1 - Pstay) * n_neighbors / 4 [ move-to one-of real_neighbors]     ]  ]
     ask pptases
-    [ if ( n_neighbors > 0 )    [     if random-float 1 < 1 - Pstay [ move-to one-of real_neighbors]     ]  ]
+    [ if ( n_neighbors > 0 )    [     if random-float 1 < (1 - Pstay) * n_neighbors / 4 [ move-to one-of real_neighbors]     ]  ]
   ]
 end
 

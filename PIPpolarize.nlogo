@@ -1,135 +1,146 @@
-extensions [ vid ]
-;dsfadfgser
-;dsfdfsafwerwerfgsdgwegadfgser
-globals [
-  setup-success?
-  okay-to-save?
-  run-index
+; [Note]
+; It's logically and computationally better to use "ifelse  - and what follows" rather than a series of "if's". However, doing so in Netlogo, the readability is greatly sacrificed.
+; Therefore when the speed is not compromised much, I will use a series of "if's" instead of "ifelse - and what follows".
 
-  ; Internally set Constants ;
-  colorname-outpatches
-  RGB-pip1
-  RGB-pip2
-  RGB-kinase
-  RGB-pptase
+; Import vid extension for video recording
+extensions [ vid ]
+
+; Set up global variables
+globals [
+  setup-success? ; Indicates whether the parameters are reasonable such that the simulation can be run.
+  okay-to-save? ; Indicates whether output can be saved.
+  run-index ; Simulation run index
+
+  ; Default color setups for visualization ;
+  colorname-outpatches ; Color of the patches not part of the membrane
+  RGB-pip1 ; Color of PIP1
+  RGB-pip2 ; Color of PIP2
+  RGB-kinase ; Color of Kinase
+  RGB-pptase ; Color of Phosphatase
 
   ; Calculated Constants ;
-  dist_enz ; distance travelled by enzyme per timestep
-  alpha-pip ; alpha = beta (from FTCS calculation)
-  alpha-enz ; alpha = beta (from FTCS calculation)
-  patchLength
-  const-k_Poff
-  const-p_Poff
+  dist_enz ; Defines the distance travelled by enzyme per timestep
+  alpha-pip ; Diffusivity of PIP lipids in the Forward-time centered-space scheme used in this model.
+  alpha-enz ; Diffusivity of PIP lipids in the Forward-time centered-space scheme used in this model.
+  patchLength ; length of the side of a patch in our model
+  const-k_Poff ; Probability of kinase unbinding 
+  const-p_Poff ; Probability phosphatase unbinding 
 
-  Pstay
+  Pstay ; Probability of staying in the same patch.
 
   ; Patch lists ;
-  inpatches
-  outpatches
-  Lpatches
-  Spatches
+  inpatches ; patches that are part of the membrane
+  outpatches ; patches that are not part of the membrane
+  Lpatches ; patches that are members of the "large" part
+  Spatches ; patches that are members of the "small" part
 
-  ; Trackers - ever changing ;
-  avg_x
-  time
-  next_tlapse_time
+  ; Trackers - these values are ever changing ;
+  avg_x ; average fraction of PIP2 over (PIP1 + PIP2) across inpatches
+  time ; elapsed simulation time
+  next_tlapse_time ; the next time to take a snapshot of the simulation
 
-  file-prefix
+  file-prefix ; prefix for output save files
 ]
 
-breed [ kinases kinase ]
-breed [ pptases pptase ]
-breed [ clocks clock ]
+breed [ kinases kinase ] ; kinase species definition
+breed [ pptases pptase ] ; phosphatase species definition
+breed [ clocks clock ] ; simulation clock species definition
 
-patches-own [
-  real_neighbors
-  n_neighbors
-  x_patch
-  dx_patch
-  updated_xpatch ; this is a must-have
+patches-own [ ; each patch owns the following properties
+  real_neighbors ; spatially connected patches that allow transfer of enzymes and lipids
+  n_neighbors ; number of neighboring patches for the current patch
+  x_patch ; previous x-value (i.e., the fraction of PIP2 over PIP1 + PIP2) for the current patch
+  dx_patch ; the magnitude of x-change occurred for the current time step
+  updated_xpatch ; the updated x-value 
 
   ; Deterministic mode variables
-  patch_k_density
-  patch_p_density
-  updated_kpatch
-  updated_ppatch
+  patch_k_density ; previous surface density of kinases
+  patch_p_density ; previous surface density of phosphatses
+  updated_kpatch ; updated surface density of kinases
+  updated_ppatch ; updated surface density of phosphatases
 
   ; Stochastic mode variables
-  k_Pon
-  p_Pon
+  k_Pon ; The probability of kinase binding to the patch
+  p_Pon ; The probability of phosphatase binding to the patch
 ]
 
-to setup
-  clear-all
-  display
-  set setup-success? true ; It will change to false if something goes wrong in the setup process.
-  set okay-to-save? false
+to setup ; Clicking this button sets up the simulation
+  clear-all ; Clear all graphs
+  display ; Display the updated visuals
+  set setup-success? true ; set setup-success? as true as default and assign false if error is detected later.
+  set okay-to-save? false ; assign true later if it passes the upcoming check. 
 
-  RESET-TICKS
+  RESET-TICKS ; reset simulation TICKS
 
-  plot_dxdt_vs_x
+  plot_dxdt_vs_x ; plot the expected rate of change of x as a function of x. (note that this study aims to show stochasticity can yield outcomes not predicted by this simple rate law)
 
-  ; Fix constants (internally defined) ;
+  ; Set colors
   set colorname-outpatches brown - 1
   set RGB-pip1 [0 100 255] ;  set RGB-pip1 extract-rgb blue
   set RGB-pip2 [255 200 0]
   set RGB-kinase [255 150 0]
   set RGB-pptase [0 150 255]
 
-  ; Init patchsets
+  ; Initialize inpatches and outpatches 
   set inpatches no-patches
   set outpatches no-patches
 
-  ; Setup time
+  ; Initialize simulation time
   set time 0
 
-  ; Setup space
-  resize-world 0 (nGrid - 1) 0 (nGrid - 1)
+  ; Initialize simulation space
+  resize-world 0 (nGrid - 1) 0 (nGrid - 1) ; initialize the world size to start from 0 to nGrid - 1, instead of 0, 0 being the center as default.
+  ; Below option can be used for a quick catalytic force balance test with a one-tenth strip of the membrane.
   if smaller-part-test? and Calculation-Type = "deterministic" and geometry-setup = "None" [resize-world 0 (nGrid - 1) 0 (nGrid - 1) / 10]
-  set-patch-size world_pixel_length / nGrid
-  let wrap? true
+  set-patch-size world_pixel_length / nGrid ; set the "displayed" size of the patches
+  let wrap? true ; set the wrap option as true by default (cyclical boundary condition)
   ifelse wrap? [ __change-topology true  true  ]
                 [ __change-topology false false ]
-  setup_world_from_input_file
-  set patchLength worldLength / nGrid
-  set-neighbors_and_outColors
-  initialize_patches
+  setup_world_from_input_file ; this function call sets up the world based on the input file (function defined later in this file)
+  set patchLength worldLength / nGrid ; set the length of the side of a patch in our model
+  set-neighbors_and_outColors ; this function call sets the neighbors and outColors for each patch
+  initialize_patches ; this function call initializes the patches with the given initial conditions
 
-  ; L patch and S patch
-  if plot-xL-xS? [
-    set Lpatches no-patches
-    set Spatches no-patches
-    ask inpatches [
+  ; L patch and S patch (L: large, S: small) setup. This requires the user use 50-snail6.png as the membrane geometry.
+  if plot-xL-xS? [ ; if the user wants to plot the difference between the average x of L and S patches
+    set Lpatches no-patches ; initialize Lpatches
+    set Spatches no-patches ; initialize Spatches
+    ask inpatches [ ; assign patches to Lpatches and Spatches based on the given conditions
       if pxcor >= 24 / 50 * nGrid and pxcor < 26 / 50 * nGrid and pycor >= 24 / 50 * nGrid and pycor < 26 / 50 * nGrid [ set Lpatches (patch-set Lpatches self)]
       if pxcor >= 45 / 50 * nGrid and pxcor < 47 / 50 * nGrid and pycor >= 44 / 50 * nGrid and pycor < 46 / 50 * nGrid [ set Spatches (patch-set Spatches self)]
     ]
+    ; if the user is not using 50-snail6.png as the geometry, the user will be prompted to turn off the plot-xL-xS? switch.
     if Spatches = no-patches or Lpatches = no-patches [ user-message "Are you using 50-snail6.png as geometry? If not, try setting the \"plot-xL-xS? switch\" to \"off\"." ]
   ]
 
   ; Set-up clock
-  if timestamp-on-image?
-  [  create-clocks 1 [ set label (precision time 1) setxy (min-pxcor + nGrid / 5) (max-pycor - nGrid / 20) set size 0 ]  ]
+  if timestamp-on-image? ; if the user wants to display the timestamp on the image
+  [  create-clocks 1 [ set label (precision time 1) setxy (min-pxcor + nGrid / 5) (max-pycor - nGrid / 20) set size 0 ]  ] ; create a clock at the top-left corner of the world
 
-  ; Setup (unchanging) constants
-  set alpha-pip D_pip * timestep / (worldLength / nGrid) ^ 2
-  if Calculation-Type = "deterministic" [set alpha-enz D_enz * timestep / (worldLength / nGrid) ^ 2]
-  set Pstay 1 - (4 * D_enz * timestep) / (worldLength / nGrid) ^ 2
-  set const-k_Poff k_koff * timestep   if const-k_Poff > 1 [user-message "k_off_prob_sto > 1"]
-  set const-p_Poff p_koff * timestep   if const-p_Poff > 1 [user-message "p_off_prob_sto > 1"]
+  ; Setup constants
+  set alpha-pip D_pip * timestep / (worldLength / nGrid) ^ 2 ; calculate the diffusivity of PIP lipids, based on the forward-time centered-space scheme
+  if Calculation-Type = "deterministic" [set alpha-enz D_enz * timestep / (worldLength / nGrid) ^ 2] ; calculate the diffusivity of enzymes, based on the forward-time centered-space scheme
+  set Pstay 1 - (4 * D_enz * timestep) / (worldLength / nGrid) ^ 2 ; calculate the probability of staying in the same patch
+  ; calculate the probability of kinase unbinding. This is constant, irrespective of the number of kinases in the patch.
+  set const-k_Poff k_koff * timestep   if const-k_Poff > 1 [user-message "k_off_prob_sto > 1"] 
+  ; calculate the probability of phosphatase unbinding. This is constant, irrespective of the number of phosphatases in the patch.
+  set const-p_Poff p_koff * timestep   if const-p_Poff > 1 [user-message "p_off_prob_sto > 1"] 
 
-  ; Check for stability condition for the numerical treatment of diffusion
-  if timestep > (worldLength / nGrid) ^ 2 / (4 * D_pip) [ user-message (word "FTCS dispersion - Stable condition not met. Decrease timestep below " ((worldLength / nGrid) ^ 2 / (4 * D_pip)) ) ]
-  if Calculation-Type = "deterministic" [if timestep > (worldLength / nGrid) ^ 2 / (4 * D_enz) [ user-message (word "Stable condition not met. Decrease timestep below " ((worldLength / nGrid) ^ 2 / (4 * D_enz)) ) ]]
+  ; Check for stability condition for the numerical treatment of diffusion of PIP lipids
+  if timestep > (worldLength / nGrid) ^ 2 / (4 * D_pip) [ user-message (word "FTCS dispersion - Stable condition not met. Decrease timestep below " ((worldLength / nGrid) ^ 2 / (4 * D_pip)) ) ] ; If timestep is longer than the stable condition, the user will be prompted to decrease the timestep.
+  ; Check for stability condition for the numerical treatment of enzyme diffusion
+  if Calculation-Type = "deterministic" [if timestep > (worldLength / nGrid) ^ 2 / (4 * D_enz) [ user-message (word "Stable condition not met. Decrease timestep below " ((worldLength / nGrid) ^ 2 / (4 * D_enz)) ) ]] ; If timestep is longer than the stable condition, the user will be prompted to decrease the timestep.
 
-  ; Init save files
-  set file-prefix retrieve-simul_info_string
-  output-print file-prefix
-  ifelse save_timelapse_img? or record_vid? or save_all_plots? or save-xL-xS?  [  set setup-success? initialize-saving   ]
+  ; Initialize save files
+  set file-prefix retrieve-simul_info_string ; set the file-prefix as the simulation information string
+  output-print file-prefix ; print the simulation information string
+  ; Save the initial interface - this will save all parameter settings by capturing the interface screen at the beginning of the simulation.
+  ifelse save_timelapse_img? or record_vid? or save_all_plots? or save-xL-xS?  [  set setup-success? initialize-saving   ]  
   [ set save-dir-name "N/A" ]
   display
 end
 
-
+; Plot the expected rate of change of x as a function of x. (note that this study aims to show stochasticity can yield outcomes not predicted by this simple rate law)
 to plot_dxdt_vs_x
   let Nxpoints 100
   let xpoints n-values (Nxpoints + 1) [ x -> x / 100 ]
@@ -158,16 +169,18 @@ to plot_dxdt_vs_x
     plotxy 0.5 plot-y-max
     plotxy 0.5 plot-y-min
   ] [
+    ; If the plotting fails, the user will be prompted with an error message.
     print (word "dx/dt vs x Plotting failed (check kinetic parameters) Code:" error-message)
   ]
 end
 
-
+; Initialize the patches with the given initial conditions
 to initialize_patches
-  ; Read input k-, p- density and x.
+  ; Read input kinase and phosphatase density, and also the x-value.
   let init-k_patch-density item 0 read-from-string KIN-PPT-X
   let init-p_patch-density item 1 read-from-string KIN-PPT-X
-  if Enzyme-Pair-Type = "memK-solP" and init-p_patch-density != 0
+  ; If the user wants to set up a solution-phosphatase setup, the user will be prompted with a warning message.
+  if Enzyme-Pair-Type = "memK-solP" and init-p_patch-density != 0  
   [ user-message "**Warning: \"Setting up a solution-phosphatase setup\" and still adding binding phosphatase on the membrane as initial condition?"]
   let init-x_patch item 2 read-from-string KIN-PPT-X
 
@@ -179,15 +192,15 @@ to initialize_patches
     set patch_p_density 0
   ]
 
-  ; Placing kinases and phosphatases
-  if Calculation-Type = "deterministic" [
+  ; Place kinases and phosphatases
+  if Calculation-Type = "deterministic" [  ; If the kinetics is deterministic, the densities, rather than individual molecules will be set.
     ask inpatches [
       set patch_k_density init-k_patch-density
       set patch_p_density init-p_patch-density
     ]
   ]
 
-  if Calculation-Type = "stochastic" [
+  if Calculation-Type = "stochastic" [ ; If the kinetics is stochastic, individual enzymes will be placed.
     let n_init-kinases init-k_patch-density * count inpatches * patchLength ^ 2
     repeat n_init-kinases[
       ask one-of inpatches [
@@ -208,13 +221,14 @@ to initialize_patches
     ]  ]  ]
   ]
 
-  ; Setting up x (equilvalent to setting up PIP1/PIP2 ratio)
+  ; Setting up x (note that this is equilvalent to setting up PIP1/PIP2 ratio)
   ask inpatches [   set x_patch init-x_patch   ]
-  if Calculation-Type = "deterministic" [ fluctuate ] ; If kinetics is deterministic, initial fluctuation is "required" to see any kind of instability to develop
+  if Calculation-Type = "deterministic" [ fluctuate ] ; If the model is deterministic, initial fluctuation is strictly "required" to see any kind of instability to develop
 
   ; Visualize x as patch color
   ask inpatches [ represent-x-as-patch-color ]
 
+  ; Set up the average x value
   set avg_x mean [x_patch] of inpatches
 
   ; Show-or-hide enzymes
@@ -223,10 +237,12 @@ to initialize_patches
     if not show_enz? [ ask kinases [hide-turtle] ask pptases [hide-turtle] ]
   ]
 end
-
+ 
+; Initialize the saving process
 to-report initialize-saving
   let success? true ; This will change to false if something goes wrong in the process.
 
+  ; If the user has not selected a directory to save the results, the user will be prompted with a warning message.
   if (save_timelapse_img? or record_vid? or save_all_plots? or save-xL-xS?) and (save-dir-name = "N/A" or save-dir-name = "") [
     carefully [      set save-dir-name user-directory    ]
     [ ;user-message "Results saving directory not selected."
@@ -235,7 +251,9 @@ to-report initialize-saving
     ]
   ]
 
+  ; Handle video-recording situation
   if record_vid? [
+    ; Handle the situation where the previous video capture was not finished.
     if vid:recorder-status = "recording"
     [
       user-message "Video init failed. Previous video capture was not finished. Attempting to save previous video as dump_mov.mp4."
@@ -249,6 +267,7 @@ to-report initialize-saving
     ]
   ]
 
+  ; Handle the situation where the directory is not valid.
   carefully [ export-interface (word save-dir-name "iface-t0 " file-prefix ".png") ] ; If this directory does not exist, this will spit out an error message.
   [
     user-message "Saving to the save-dir-name failed. Make sure you've put in a valid directory"
@@ -258,34 +277,34 @@ to-report initialize-saving
   report success?
 end
 
-
+; The main simulation loop
 to go
+  ; Check if the setup was successful
   if setup-success? = false
   [ user-message "Setup status unsuccessful."    stop  ]
+  ; Check the result saving conditions
   if save-dir-name != "N/A" and not file-exists? (word save-dir-name "iface-t0 " file-prefix ".png") ; Trying to find the screenshot of the initial interface taken at "setup".
   [ user-message "Needs to redo \"setup\"" set save-dir-name "N/A" set setup-success? false stop ] ; If it's not found, tell the user that probably, you changed the save-dir after you pressed "setup"
-
   if save-dir-name != "N/A" and okay-to-save? = false [
     ifelse "no" = user-one-of (word "Saving result file(s) to " save-dir-name " - Okay?") ["yes" "no"]
     [  stop  ]
     [ set okay-to-save? true ]
   ]
 
-
-
   ; Check stop-conditions and apply necessary ending steps
   if time > endtime
   [
-    ; Save
+    ; Save the final interface if any of the below conditions are set true. 
     if save_timelapse_img? or record_vid? or save_all_plots? or save-xL-xS?
     [
       set-current-directory save-dir-name
       export-interface (word "iface-End " file-prefix ".png")
     ]
 
+    ; Increase the run-index by 1  
     set run-index  run-index + 1
 
-    ; single-run ends and moves on to the next run
+    ; If single-run ends do the following and move on to the next run
     if run-index < N-runs [
       ask kinases [ die ]
       ask pptases [ die ]
@@ -294,7 +313,7 @@ to go
       set next_tlapse_time 0
     ]
 
-    ; All-runs end and Export "xL-xS"
+    ; When all-runs end export "xL-xS"
     if run-index >= N-runs [
       if save-xL-xS? [export-plot "xL-xS" (word "xL-xS of " file-prefix  " " N-runs "-runs.csv")]
       if record_vid? [  vid:save-recording (word file-prefix "_mov.mp4") ]
@@ -305,10 +324,10 @@ to go
     ; Clear non-accumulative plots
     set-current-plot "Max Min dx_patch" clear-plot
     set-current-plot "Max Pon-patch" clear-plot
-;    set-current-plot "Max - Min dx_patch" clear-plot
+  ; set-current-plot "Max - Min dx_patch" clear-plot
   ]
 
-  ; Visual/graph updates
+  ; Update visuals and graphs
   if show_enz? [ ask kinases [show-turtle] ask pptases [show-turtle] ]
   if not show_enz? [ ask kinases [hide-turtle] ask pptases [hide-turtle] ]
   if timestamp-on-image? [ ask clocks [ set label (precision time 1) ] ]
@@ -324,17 +343,19 @@ to go
   if save_timelapse_img? and time >= next_tlapse_time [ save_tlapse_img ]
   if record_vid?   [ if ticks mod vid_rec_intval = 0 [carefully[ vid:record-view ][ print "Video capture failed."] ] ]
 
-  ; All the main functions are below:
+  ; Call the below functions sequentially
   unbind
   bind
   convert
   move
 
+  ; Increase the tick
   tick
+  ; Increase the time by timestep
   set time (time + timestep);
 end
 
-
+; Save the timelapse image
 to save_tlapse_img
   let inttime precision time 0
   let nZeros 3 - (length (word inttime))
@@ -343,15 +364,11 @@ to save_tlapse_img
   set $3digit_time (word $3digit_time inttime)
   set-current-directory save-dir-name
   export-view (word save-dir-name run-index " t" $3digit_time ".png")
-;  ifelse simple-savename? [    export-view (word run-index " t" $3digit_time ".png")      ]
-;                          [    export-view (word file-prefix " t" $3digit_time ".png")    ]
   set next_tlapse_time    next_tlapse_time + tlapse_interval
 end
 
-
+; Use the input image file to set up the shape of the membrane
 to setup_world_from_input_file
-  ; It's logically and computationally better to use "ifelse  - and what follows" rather than a series of "if's". However, doing so in Netlogo, the readability is greatly sacrificed.
-  ; Therefore when the speed is not compromised much, I will use a series of "if's" instead of "ifelse - and what follows".
   if geometry-setup = "None" [
     set inpatches patches
     set outpatches no-patches
@@ -364,14 +381,13 @@ to setup_world_from_input_file
   ]
 end
 
-
+; Add sinusoidal perturbation to the pip composition of the membrane. This will test how different modes of fluctuations will develop through out the simulation by inherent Turing instability, if present.
 to add-sinusoidal-pip-perturbation
   if perturb-amplitude = 0 [user-message "Change perturb-amplitude to non-zero value"]
   if pert-wavelength = 0 [user-message "Change pert-wavelength (perturbation wavelength) ato non-zero value"]
   carefully [
     ask inpatches [
       let patch-xcor (pxcor / nGrid * worldLength)
-      ;    let patch-ycor (pycor / nGrid * worldLength)
       let perturb_x (perturb-amplitude * cos (2 * 180 / pert-wavelength * patch-xcor))
       set x_patch (x_patch + perturb_x)
       if x_patch > 1 [ set x_patch 1 ]
@@ -379,42 +395,44 @@ to add-sinusoidal-pip-perturbation
     ]
     ask inpatches [ represent-x-as-patch-color ]
     display
-  ]
+  ] ; If the perturbation fails, the user will be prompted with an error message.
   [   user-message "Error. Change pert-wavelength (perturbation wavelength) to a non-zero value"   ]
 end
 
-
+; Fluctuate the PIP composition of the membrane
 to fluctuate
   let shot-noise-multiplier 1
   ask inpatches [
     ; Fluctuate pips
-    let N_tot_pip  55555 * patchLength ^ 2
-    let delta_xpatch random-normal 0      x_patch * (1 - x_patch) / sqrt(N_tot_pip)
-    set x_patch x_patch + delta_xpatch * shot-noise-multiplier
-    if x_patch < 0 [ set x_patch 0 ]
-    if x_patch > 1 [ set x_patch 1 ]
+    let N_tot_pip  55555 * patchLength ^ 2 ; the PIP lipid surface density is set to 55555 molecules/um^2
+    let delta_xpatch random-normal 0      x_patch * (1 - x_patch) / sqrt(N_tot_pip) ; the fluctuation is based on the square root of the number of PIP lipids
+    set x_patch x_patch + delta_xpatch * shot-noise-multiplier ; the fluctuation is multiplied by the shot-noise-multiplier
+    if x_patch < 0 [ set x_patch 0 ] ; the x-value cannot be less than 0
+    if x_patch > 1 [ set x_patch 1 ] ; the x-value cannot be more than 1
 
-    ; Fluctuate enzymes
+    ; Fluctuate the kinases number
     let N_kinase   N_tot_pip * k_mkon / k_koff
     let p_k patch_k_density / (k_mkon / k_koff)
     let q_k    1 - p_k
     let delta_kpatch random-normal 0   p_k * q_k / sqrt(N_kinase)
     set patch_k_density patch_k_density + delta_kpatch
-    if patch_k_density < 0 [ set patch_k_density 0 ]
+    if patch_k_density < 0 [ set patch_k_density 0 ] ; the enzyme density cannot be less than 0
 
+    ; Fluctuate the phosphatase number
     let N_pptase    N_tot_pip * p_mkon / p_koff
     let p_p patch_p_density / (p_mkon / p_koff)
     let q_p    1 - p_p
     let delta_ppatch random-normal 0    p_p * q_p / sqrt(N_pptase)
     set patch_p_density patch_p_density + delta_ppatch
-    if patch_p_density < 0 [ set patch_p_density 0 ]
+    if patch_p_density < 0 [ set patch_p_density 0 ] ; the enzyme density cannot be less than 0
   ]
   ask inpatches [ represent-x-as-patch-color ]
   display
 end
 
-
+; Bind the enzymes to the membrane
 to bind
+  ; If the calculation type is deterministic, the binding and unbinding of enzymes will be calculated based on the deterministic rate equations. The binding will merely increase the enzyme density on the patch.
   if Calculation-Type = "deterministic" [
     ask inpatches
     [
@@ -429,10 +447,13 @@ to bind
     ]
   ]
 
+  ; If the calculation type is stochastic, individual binding events will occur following the probability of binding to the patch.
   if Calculation-Type = "stochastic" [
+    ; For each patch, calculate the probability of kinase binding to the patch. (for both memK-memP and memK-solP cases)
     ask inpatches    [
       set k_Pon (k_mkon * x_patch * patchLength ^ 2 * timestep)
       if k_Pon > 1 [ user-message (word "k_Pon: " k_Pon) ]
+      ; If the random number is less than the probability of kinase binding to the patch, the kinase will be placed on the patch.
       if random-float 1 < k_Pon
       [ sprout-kinases 1
         [
@@ -443,10 +464,12 @@ to bind
           [ hide-turtle ]
       ]  ]
 
-      if Enzyme-Pair-Type = "memK-memP"
+      ; phosphatase binding is calculated only when the enzyme pair is membrane kinase and membrane phosphatase.
+      if Enzyme-Pair-Type = "memK-memP" ; If the enzyme pair is membrane kinase and membrane phosphatase. (c.f., "memK-solP" type posits that the phosphatase does not bind to the membrane and acts from the solution.)
       [
         set p_Pon (p_mkon * (1 - x_patch) * patchLength ^ 2 * timestep)
         if p_Pon > 1 [    user-message (word "p_Pon: " p_Pon)  ]
+        ; If the random number is less than the probability of phosphatase binding to the patch, the phosphatase will be placed on the patch.
         if random-float 1 < p_Pon
         [ sprout-pptases 1
           [
@@ -461,7 +484,7 @@ to bind
   ]
 end
 
-
+; Move the enzymes and lipids according to the diffusion laws and parameters
 to move
   ; Diffuse pip
   ask inpatches  [ set   updated_xpatch         x_patch * (1 - (4 * alpha-pip * (n_neighbors / 4))) + (sum [ x_patch ] of real_neighbors) * alpha-pip ]
@@ -485,7 +508,7 @@ to move
   ]
 end
 
-
+; Convert the enzymes and lipids according to the reaction laws and parameters
 to convert
   ask inpatches [
 
@@ -494,11 +517,11 @@ to convert
     let kinase-density 0
     let pptase-density 0
 
+    ; Calculate the kinase and phosphatase densities based on the calculation type.
     if Calculation-Type = "deterministic" [
       set kinase-density patch_k_density
       set pptase-density patch_p_density
     ]
-
     if Calculation-Type = "stochastic" [
       set kinase-density count kinases-here / patchLength ^ 2
       set pptase-density count pptases-here / patchLength ^ 2
@@ -511,8 +534,10 @@ to convert
     if Enzyme-Pair-Type = "memK-memP" [ set Pptase_contribution   -1 * memP_mkcat * pptase-density * x_patch / (p_mKm + x_patch) ]
     if Enzyme-Pair-Type = "memK-solP" [ set Pptase_contribution   -1 * solP_mkcat * x_patch / (p_mKm + x_patch) ]
 
+    ; Calculate the rate of change of x based on the kinase and phosphatase contributions.
     set dx_patch (Kinase_contribution + Pptase_contribution) * timestep
 
+    ; If the user wants to disallow too large dx, the user will be prompted with a warning message.
     if disallow-too-large-dx? and abs(dx_patch) > 0.5 [ user-message (word "abs(d_x_patch) > 0.5 patch: " dx_patch " at " pxcor " " pycor)  ]
     set x_patch (x_patch + dx_patch)
     if x_patch < 0 [ set x_patch 0 ]
@@ -520,7 +545,7 @@ to convert
   ]
 end
 
-
+; Unbind the enzymes from the membrane
 to unbind
   if Calculation-Type = "deterministic" [
     ask inpatches [
@@ -528,6 +553,7 @@ to unbind
       set patch_k_density patch_k_density - k_unbinding-flux
       if patch_k_density < 0 [ set patch_k_density 0 ]
 
+      ; If the phosphatase is also membrane-binding, the phosphatase will also unbind from the membrane.
       if Enzyme-Pair-Type = "memK-memP" [
         let p_unbinding-flux p_koff * patch_p_density * timestep
         set patch_p_density patch_p_density - p_unbinding-flux
@@ -536,13 +562,14 @@ to unbind
     ]
   ]
 
+  ; If the calculation type is stochastic, the unbinding of enzymes will be calculated based on the random number draw.
   if Calculation-Type = "stochastic" [
     ask kinases [ if random-float 1 < const-k_Poff [ die ]  ]
     if Enzyme-Pair-Type = "memK-memP" [   ask pptases  [ if random-float 1 < const-p_Poff [ die ]  ]    ]
   ]
 end
 
-
+; Set the neighbors and outColors for each patch
 to set-neighbors_and_outColors
   ask inpatches
   [ set real_neighbors neighbors4 with [member? self inpatches]
@@ -555,14 +582,14 @@ to set-neighbors_and_outColors
     [ if any? neighbors with [member? self inpatches] [set pcolor black] ] ]
 end
 
-
+; Represent x as patch color
 to represent-x-as-patch-color
   let x1 map [[x] -> x_patch * x ] RGB-pip2
   let x2 map [[x] -> (1 - x_patch) * x ] RGB-pip1 ;  If 4 components vs. 3 components matter is involved, consider this code:  let x2 map [[x] -> (1 - x_initial) * x ] but-last RGB-pip1
   set pcolor (map + x1 x2)
 end
 
-
+; Output the simulation information string
 to-report retrieve-simul_info_string
   if Enzyme-Pair-Type = "memK-memP" [
     report (word (substring Calculation-Type 0 3) " " worldLength "um "
@@ -591,7 +618,6 @@ end
 ;    ["Jan""Feb""Mar""Apr""May""Jun""Jul""Aug""Sep""Oct""Nov""Dec"]
 ;  report substring (word (100 + $index)) 1 3  ; force 2-digit string
 ;end
-
 
 ; Modules not being used at the moment
 to click-x-up
